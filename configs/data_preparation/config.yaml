@@ -1,0 +1,20 @@
+defaults: 
+  - dataset: ???
+  - _self_
+
+path_to_data_folder: "/Users/leonardoalchieri/Datasets/Physionet Cardiology Challenge 2020/training"
+dx_list_path: "~/Datasets/Physionet Cardiology Challenge 2020/Dx_map.csv"
+new_sampling_rate: 250
+target_length_seconds: 10
+
+filter:
+  lowcut: 1
+  highcut: 40
+  order: 2
+
+dataset:
+  data_split:
+    train: 0.8
+    val: 0.1
+    test: 0.1
+    random_state: 42
