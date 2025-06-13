@@ -1,21 +1,32 @@
+from pathlib import Path
+
 import numpy as np
-import wandb
+import pandas as pd
+from hydra.core.hydra_config import HydraConfig
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import GridSearchCV
 
+import wandb
 from src.data import EDADataset
 
 
 class Engine:
-    def __init__(self, model, scoring, inner_cv_folds):
+    def __init__(
+        self,
+        model,
+        scoring,
+        inner_cv_folds,
+        hydra_path: str = HydraConfig.get().runtime.output_dir,
+    ):
         self.model = model["model"]
         self.param_grid = dict(model["param_grid"])
         self.scoring = scoring
         self.inner_cv_folds = inner_cv_folds
         self.models = []  # Store best model for each fold
-        self.fold_reports = []
+        self.fold_reports: dict[str, dict] = {}
+        self.save_path = hydra_path
 
     def fit(self, datamodule: EDADataset):
         self.models = []
@@ -46,7 +57,7 @@ class Engine:
             y_pred = model.predict(X_test)
             acc = accuracy_score(y_test, y_pred)
             report = classification_report(y_test, y_pred, output_dict=True)
-            self.fold_reports.append(report)
+            self.fold_reports[fold_idx] = report
             all_accuracies.append(acc)
 
             wandb.log(
@@ -55,4 +66,9 @@ class Engine:
                     f"fold_{fold_idx+1}_report": report,
                 }
             )
-        wandb.log({"mean_accuracy": float(np.mean(all_accuracies))})
+        wandb.summary({"mean_accuracy": float(np.mean(all_accuracies))})
+
+    def save_local_results(self):
+        pd.DataFrame.from_dict(self.fold_reports).to_csv(
+            Path(self.save_path) / "reports.csv"
+        )
