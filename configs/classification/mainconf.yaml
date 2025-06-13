@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - model: xgboost
+  - feature_extractor: chronos_small
+  - validation_method: lopo
+
+seed: 42
+
+datamodule:
+  _target_: src.data.EDADataset
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/usilaughs/data.npz}
+  validation_method: ${validation_method}
+  feature_extractor: ${feature_extractor}
+
+engine:
+  _target_: src.engine.Engine
+  model: ${model}
+  scoring: accuracy
+  inner_cv_folds: 3

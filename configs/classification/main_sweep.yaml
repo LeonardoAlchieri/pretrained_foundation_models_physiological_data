@@ -1,0 +1,31 @@
+defaults:
+  - _self_
+  - model: logistic_regression
+  - feature_extractor: handcrafted
+  - validation_method: lopo
+  
+seed: 42
+
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}"
+  sweeper:
+    # standard grid search
+    params:
+      model: xgboost, logistic_regression, random_baseline
+      seed: 1,2,3,4,5
+      feature_extractor: handcrafted, chronos_small, chronos_large
+      validation_method: lopo
+
+datamodule:
+  _target_: src.data.EDADataset
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/usilaughs/data.npz}
+  validation_method: ${validation_method}
+  feature_extractor: ${feature_extractor}
+
+engine:
+  _target_: src.engine.Engine
+  model: ${model}
+  scoring: accuracy
+  inner_cv_folds: 3

@@ -25,6 +25,7 @@ from scipy.stats import linregress
 from scipy.fft import fft
 
 from src.data import EDADataset
+from src.utils.typing import DataInfo
 
 logger = getLogger(__name__)
 
@@ -169,9 +170,7 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
         `[min, max, mean, std, diff_max_min, slope, absolute_slope, mean_derivative,
         std_derivative,number_peaks,peaks_amplitude]`
     """
-
-    # Use nan_mask for further processing, or mask with np.ma:
-    data = masked_invalid(data)
+    
     logger.debug(f"Len of eda data after removal of NaN: {len(data)}")
     if len(data) == 0:
         return zeros(len(EDA_FEATURE_NAMES))
@@ -276,3 +275,33 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
             axis=1
         )
         
+        
+class HandcraftedFeatureExtractor:
+    """
+    A class to extract handcrafted features from EDA signals.
+    """
+    
+    def __init__(self, sampling_rate: int = 4):
+        self.sampling_rate = sampling_rate
+
+    def __call__(self, data: DataInfo) -> EDADataset:
+        """
+        Extracts features from the EDA dataset.
+
+        Parameters
+        ----------
+        data : EDADataset
+            The dataset containing EDA signals.
+
+        Returns
+        -------
+        EDADataset
+            The dataset with extracted features.
+        """
+
+        logger.info("Extracting handcrafted features from EDA signals.")
+        features = handcrafted_eda_features(data["values"])
+        features = masked_invalid(features, copy=False)
+        data["features"] = features.reshape(features.shape[0], -1)
+        data["feature_names"] = EDA_FEATURE_NAMES
+        return data

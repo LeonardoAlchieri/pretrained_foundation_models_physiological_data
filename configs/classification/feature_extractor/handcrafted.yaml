@@ -1,0 +1,2 @@
+_target_: src.feature_extraction.handcrafted.HandcraftedFeatureExtractor
+sampling_rate: 4 # Hz
