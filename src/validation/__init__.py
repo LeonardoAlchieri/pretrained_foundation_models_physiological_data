@@ -22,9 +22,10 @@ class TACV:
         train_folds = []
         test_folds = []
 
-        for _, test_user_indices in gkf.split(features, labels, groups):
+        for train_otherusers_indeces, test_user_indices in gkf.split(features, labels, groups):
             test_users = np.unique(groups[test_user_indices])
             train_indices = []
+            train_indices.extend(train_otherusers_indeces)
             test_indices = []
             for user in test_users:
                 user_indices = np.where(groups == user)[0]

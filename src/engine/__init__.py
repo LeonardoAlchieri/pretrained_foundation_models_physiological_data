@@ -18,7 +18,6 @@ class Engine:
         model,
         scoring,
         inner_cv_folds,
-        hydra_path: str = HydraConfig.get().runtime.output_dir,
     ):
         self.model = model["model"]
         self.param_grid = dict(model["param_grid"])
@@ -26,11 +25,10 @@ class Engine:
         self.inner_cv_folds = inner_cv_folds
         self.models = []  # Store best model for each fold
         self.fold_reports: dict[str, dict] = {}
-        self.save_path = hydra_path
 
     def fit(self, datamodule: EDADataset):
         self.models = []
-        self.fold_reports = []
+        # self.fold_reports = {}
         self.imputers = []  # Store imputers for each fold
         for fold_idx, (Xy_train) in enumerate(datamodule.train_data_folds):
             X_train, y_train = Xy_train["features"], Xy_train["labels"]
@@ -66,9 +64,11 @@ class Engine:
                     f"fold_{fold_idx+1}_report": report,
                 }
             )
-        wandb.summary({"mean_accuracy": float(np.mean(all_accuracies))})
+        wandb.log({"mean_accuracy": float(np.mean(all_accuracies))})
+        self._save_local_results()
 
-    def save_local_results(self):
-        pd.DataFrame.from_dict(self.fold_reports).to_csv(
-            Path(self.save_path) / "reports.csv"
+    def _save_local_results(self):
+        save_path = HydraConfig.get().runtime.output_dir
+        pd.DataFrame.from_dict(self.fold_reports, orient='index').to_csv(
+            Path(save_path) / f"reports.csv"
         )

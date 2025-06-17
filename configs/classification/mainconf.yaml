@@ -1,10 +1,14 @@
 defaults:
   - _self_
-  - model: xgboost
-  - feature_extractor: chronos_small
+  - model: logistic_regression
+  - feature_extractor: moment_large
   - validation_method: lopo
+  # aggregator is the method used to aggregate the features across the channels. 
+  # Some feature extractors can accept the null: it means that the features can be computed
+  # across channels
+  - aggregator: none # accepted: concat, mean or null
 
-seed: 42
+seed: 1
 
 datamodule:
   _target_: src.data.EDADataset

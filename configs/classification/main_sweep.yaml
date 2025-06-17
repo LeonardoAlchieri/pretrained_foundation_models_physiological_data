@@ -9,13 +9,13 @@ seed: 42
 hydra:
   mode: MULTIRUN
   sweep:
-    dir: "outputs/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}"
+    dir: "outputs/multirun_${now:%Y-%m-%d}_${now:%H-%M-%S}"
   sweeper:
     # standard grid search
     params:
-      model: xgboost, logistic_regression, random_baseline
-      seed: 1,2,3,4,5
-      feature_extractor: handcrafted, chronos_small, chronos_large
+      model: logistic_regression, random_baseline, xgboost
+      seed: 42
+      feature_extractor: moment_large
       validation_method: lopo
 
 datamodule:

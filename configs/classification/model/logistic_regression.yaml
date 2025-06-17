@@ -3,5 +3,5 @@ model:
 param_grid:
   C: [0.01, 0.1, 1, 10]
   solver: ["lbfgs"]
-  penalty: ["l2", "l1"]
-  max_iter: [1000]
+  penalty: ["l2"]
+  max_iter: [10000]

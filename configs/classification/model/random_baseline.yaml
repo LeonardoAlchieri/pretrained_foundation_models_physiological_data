@@ -1,4 +1,5 @@
 model: 
     _target_: sklearn.dummy.DummyClassifier
+
 param_grid:
   strategy: ["most_frequent", "stratified", "uniform", "prior"]
