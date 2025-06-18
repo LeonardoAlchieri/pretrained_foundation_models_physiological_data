@@ -31,12 +31,14 @@ def main(cfg: DictConfig):
     
     seed_everything(cfg['seed'], workers=True)
     check_random_state(cfg['seed'])
+    # cfg = clean_config(cfg) # to clean the configs, e.g. for None values
     
     run.log({"info": f"Seed set to: {cfg['seed']}"})
 
     # get dataset
     run.log({"info": "Instantiating datamodule..."})
     datamodule = instantiate(cfg.datamodule)
+    # cfg = update_config_from_data(datamodule, cfg) # you do this if you need information about the dataset, e.g. the dataset size
     run.log({"info": f"Datamodule instantiated: {datamodule}"})
     
     # NOTE: consider moving this directly into the training and testing

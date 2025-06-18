@@ -3,6 +3,7 @@ defaults:
   - model: logistic_regression
   - feature_extractor: handcrafted
   - validation_method: lopo
+  - aggregator: none
   
 seed: 42
 
@@ -13,14 +14,16 @@ hydra:
   sweeper:
     # standard grid search
     params:
-      model: logistic_regression, random_baseline, xgboost
+      model: logistic_regression, random_baseline
       seed: 42
-      feature_extractor: moment_large
-      validation_method: lopo
+      aggregator: none, concat, mean_chan, mean_time
+      # aggregator: none
+      feature_extractor: handcrafted, chronos_large, moment_large, chronos_small
+      validation_method: tacv
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/usilaughs/data.npz}
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/usilaughs/data_right.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
 

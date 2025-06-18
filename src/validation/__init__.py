@@ -30,10 +30,17 @@ class TACV:
             for user in test_users:
                 user_indices = np.where(groups == user)[0]
                 user_indices_sorted = np.sort(user_indices)
-                n = len(user_indices_sorted)
-                split_point = int(np.ceil(2 * n / 3))
-                train_indices.extend(user_indices_sorted[:split_point])
-                test_indices.extend(user_indices_sorted[split_point:])
+                # Split indices by label
+                label_0_indices = user_indices_sorted[labels[user_indices_sorted] == 0]
+                label_1_indices = user_indices_sorted[labels[user_indices_sorted] == 1]
+                n0 = len(label_0_indices)
+                n1 = len(label_1_indices)
+                split_point_0 = int(np.ceil(2 * n0 / 3))
+                split_point_1 = int(np.ceil(2 * n1 / 3))
+                train_indices.extend(label_0_indices[:split_point_0])
+                train_indices.extend(label_1_indices[:split_point_1])
+                test_indices.extend(label_0_indices[split_point_0:])
+                test_indices.extend(label_1_indices[split_point_1:])
             train_folds.append({
                 "features": features[train_indices],
                 "labels": labels[train_indices],
