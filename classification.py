@@ -17,6 +17,16 @@ import os
 # print the current working directory
 # path.append(str(Path(__file__).parent.parent))
 
+
+# def check_conf_validity(cfg: DictConfig):
+#     """
+#     Check if the configuration is valid.
+#     """
+#     # whenever we have handcrafted features, only "none" aggregator is allowed
+#     if cfg.datamodule.feature_extractor == "handcrafted" and cfg.datamodule.aggregator != "none":
+#         return False
+#     return True
+
 @hydra.main(
     config_path="./configs/classification", 
     # config_name="config",
@@ -35,6 +45,9 @@ def main(cfg: DictConfig):
     
     run.log({"info": f"Seed set to: {cfg['seed']}"})
 
+    # if not check_conf_validity(cfg):
+    #     run.log({"error": "Configuration is not valid. Exiting..."})
+    #     return None
     # get dataset
     run.log({"info": "Instantiating datamodule..."})
     datamodule = instantiate(cfg.datamodule)
