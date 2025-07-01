@@ -2,6 +2,8 @@ from src.utils.typing import DataInfo
 import numpy as np
 from sklearn.model_selection import GroupKFold
 
+from tqdm.auto import tqdm
+
 # FIXME: something wrong with this one
 class TACV:
     def __init__(self, num_folds: int):
@@ -22,7 +24,7 @@ class TACV:
         train_folds = []
         test_folds = []
 
-        for train_otherusers_indeces, test_user_indices in gkf.split(features, labels, groups):
+        for train_otherusers_indeces, test_user_indices in tqdm(gkf.split(features, labels, groups), desc='TACV Splitting'):
             test_users = np.unique(groups[test_user_indices])
             train_indices = []
             train_indices.extend(train_otherusers_indeces)
@@ -71,7 +73,7 @@ class LOPO:
         unique_groups = np.unique(groups)
         train_folds = []
         test_folds = []
-        for group in unique_groups:
+        for group in tqdm(unique_groups, desc='LOPO Splitting'):
             test_idx = np.where(groups == group)[0]
             train_idx = np.where(groups != group)[0]
             train_folds.append({

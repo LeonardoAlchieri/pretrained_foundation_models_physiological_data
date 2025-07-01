@@ -40,3 +40,4 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
+  n_jobs: 20
