@@ -7,6 +7,9 @@ from hydra.utils import instantiate
 from pytorch_lightning import seed_everything
 # set seeds for sklearn
 from sklearn.utils import check_random_state
+from logging import getLogger
+
+logger = getLogger(__name__)
 # import wandb
 # import os
 
@@ -36,45 +39,46 @@ def main(cfg: DictConfig):
     # run = wandb.init(project="pretrained_foundation_models_physiological_data", 
     #                  config=OmegaConf.to_container(cfg, resolve=True))
     
-    print({"info": "Starting classification experiment..."})
-    print({"config": OmegaConf.to_yaml(cfg)})
+    logger.info("Starting classification experiment...")
+    logger.info("OmegaConf.to_yaml(cfg)")
     
     seed_everything(cfg['seed'], workers=True)
     check_random_state(cfg['seed'])
     # cfg = clean_config(cfg) # to clean the configs, e.g. for None values
     
-    print({"info": f"Seed set to: {cfg['seed']}"})
+    logger.info(f"Seed set to: {cfg['seed']}")
 
     # if not check_conf_validity(cfg):
-    #     print({"error": "Configuration is not valid. Exiting..."})
+    #     print({"error": "Configuration is not valid. Exiting...")
     #     return None
     # get dataset
-    print({"info": "Instantiating datamodule..."})
+    logger.info("Instantiating datamodule...")
     datamodule = instantiate(cfg.datamodule)
     # cfg = update_config_from_data(datamodule, cfg) # you do this if you need information about the dataset, e.g. the dataset size
-    print({"info": f"Datamodule instantiated: {datamodule}"})
+    logger.info(f"Datamodule instantiated: {datamodule}")
     
     # NOTE: consider moving this directly into the training and testing
-    print({"info": "Extracting features..."})
+    logger.info("Extracting features...")
     datamodule.extract_features(inplace=True)
-    print({"info": "Features extracted."})
-    print({"info": "Performing train/test split..."})
+    logger.info("Features extracted.")
+    logger.info("Performing train/test split...")
     datamodule.train_test_split(inplace=True)
-    print({"info": "Train/test split done."})
+    logger.info("Train/test split done.")
     
-    # NOTE: this needs to be an SKLearn model
-    print({"info": "Instantiating engine..."})
+    # NOTE: this needs to be a SKLearn model
+    logger.info("Instantiating engine...")
     engine = instantiate(cfg.engine)
-    print({"info": f"Engine instantiated: {engine}"})
+    logger.info(f"Engine instantiated: {engine}")
     
     # NOTE: inside the fit, we can consider implementing 
-    print({"info": "Fitting engine..."})
+    logger.info("Fitting engine...")
     engine.fit(datamodule)
-    print({"info": "Engine fit complete."})
-    print({"info": "Testing engine..."})
+    logger.info("Engine fit complete.")
+    logger.info("Testing engine...")
     engine.test(datamodule)
-    print({"info": "Engine test complete."})
+    logger.info("Engine test complete.")
     # run.finish()
+    
 
 if __name__ == "__main__":
     main()
