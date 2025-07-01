@@ -19,6 +19,7 @@ class MOMENTExtractor:
         aggregator: object | str = "None",
         batch_size: int = 32,
     ):
+        self.model_name = model_name
         # TODO: figure out where to put the device_map and torch_dtype parameters
         self.pipeline = MOMENTPipeline.from_pretrained(
             model_name,
@@ -29,6 +30,19 @@ class MOMENTExtractor:
         self.batch_size = batch_size
         self.device_map = device_map
         self.torch_dtype = torch_dtype
+        
+    def to_dict(self):
+        """
+        Returns a dictionary representation of the class.
+        """
+        return {
+            "name": self.__class__.__name__,
+            "model_name": self.model_name,
+            "device_map": self.device_map,
+            "torch_dtype": str(self.torch_dtype),
+            "aggregator": str(self.aggregator.__class__.__name__),
+            "batch_size": self.batch_size,
+        }
 
     def _create_dataloader(self, vals: torch.Tensor) -> DataLoader:
         """

@@ -8,6 +8,7 @@ from src.utils.config import check_aggregator
 from tqdm.auto import tqdm
 from torch.utils.data import DataLoader, TensorDataset
 
+
 class ChronosExtractor:
     """
     A class to extract handcrafted features from EDA signals.
@@ -21,6 +22,9 @@ class ChronosExtractor:
         aggregator: object | str = "None",
         batch_size: int = 32,
     ):
+        self.model_name = model_name
+        self.device_map = device_map
+        self.torch_dtype = torch_dtype
         self.pipeline = ChronosPipeline.from_pretrained(
             model_name,
             device_map=device_map,
@@ -29,34 +33,51 @@ class ChronosExtractor:
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
 
+    def to_dict(self):
+        """
+        Returns a dictionary representation of the class.
+        """
+        return {
+            "name": self.__class__.__name__,
+            "model_name": self.model_name,
+            "device_map": self.device_map,
+            "torch_dtype": str(self.torch_dtype),
+            "aggregator": str(self.aggregator.__class__.__name__),
+            "batch_size": self.batch_size,
+        }
+
     def _process_channel_in_batches(self, channel_data: torch.Tensor) -> np.ndarray:
         """
         Process a single channel's data in batches to avoid memory issues.
-        
+
         Parameters
         ----------
         channel_data : torch.Tensor
             Data for a single channel with shape (batch_size, sequence_length)
-            
+
         Returns
         -------
         np.ndarray
             Embedded features for the channel
         """
         all_embeddings = []
-        
-        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress"):
+
+        for i in tqdm(
+            range(0, channel_data.shape[0], self.batch_size), desc="Batch progress"
+        ):
             batch_end = min(i + self.batch_size, channel_data.shape[0])
             batch_data = channel_data[i:batch_end]
-            
+
             # Process the batch
             batch_embeddings = self.pipeline.embed(batch_data)[0].numpy()
             all_embeddings.append(batch_embeddings)
-        
+
         # Concatenate all batch results
         return np.concatenate(all_embeddings, axis=0)
 
-    def _process_channel_with_dataloader(self, channel_data: torch.Tensor) -> np.ndarray:
+    def _process_channel_with_dataloader(
+        self, channel_data: torch.Tensor
+    ) -> np.ndarray:
         """
         Process a single channel's data using PyTorch DataLoader.
 
@@ -64,7 +85,7 @@ class ChronosExtractor:
         ----------
         channel_data : torch.Tensor
             Data for a single channel with shape (batch_size, sequence_length)
-            
+
         Returns
         -------
         np.ndarray
@@ -108,7 +129,7 @@ class ChronosExtractor:
             for i in range(vals.shape[2]):
                 channel_embeddings = self._process_channel_with_dataloader(vals[..., i])
                 channel_features.append(channel_embeddings)
-            
+
             features: np.ndarray = self.aggregator(channel_features)
             # features = np.stack(
             #     [

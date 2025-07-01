@@ -8,30 +8,35 @@ defaults:
   - override hydra/sweeper: list
   
 seed: 42
+dataset: usilaughs
+side: right
 
 hydra:
   mode: MULTIRUN
   sweep:
-    dir: "outputs_bihearts_left/multirun_${now:%Y-%m-%d}_${now:%H-%M-%S}"
+    dir: "outputs/${dataset}-${side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
   sweeper:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      aggregator: none, none, none, concat, mean_chan, mean_time, none, concat, mean_chan, mean_time, none, concat, mean_chan, mean_time
-      feature_extractor: handcrafted, handcrafted, chronos_large, chronos_large, chronos_large, chronos_large, moment_large, moment_large, moment_large, moment_large, chronos_small, chronos_small, chronos_small, chronos_small
+      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      aggregator: none, none, mean_chan, mean_chan, mean_chan
+      feature_extractor: handcrafted, handcrafted, chronos_large, moment_large, chronos_small
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/bihearts/data_left.npz}
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
 
 engine:
   _target_: src.engine.Engine
   model: ${model}
-  scoring: accuracy
+  scoring: 
+    _target_: sklearn.metrics.balanced_accuracy_score
+    _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}

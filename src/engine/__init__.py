@@ -1,4 +1,5 @@
 from functools import partial
+from logging import getLogger
 from pathlib import Path
 from typing import Callable
 
@@ -6,20 +7,18 @@ import numpy as np
 import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from imblearn.under_sampling.base import BaseUnderSampler
+from joblib import parallel_backend
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    classification_report,
-    make_scorer,
-)
+from sklearn.metrics import (accuracy_score, balanced_accuracy_score,
+                             classification_report, make_scorer)
 from sklearn.model_selection import GridSearchCV
 from tqdm.auto import tqdm
 
 # import wandb
 from src.data import EDADataset
-from joblib import parallel_backend
+
+logger = getLogger(__name__)
 
 
 class Engine:
@@ -87,13 +86,13 @@ class Engine:
             self.fold_reports[fold_idx] = report
             all_accuracies.append(acc)
 
-            print(
+            logger.info(
                 {
                     f"fold_{fold_idx+1}_{self.scoring.__name__}": acc,
                     f"fold_{fold_idx+1}_report": report,
                 }
             )
-        print({f"mean_{self.scoring.__name__}": float(np.mean(all_accuracies))})
+        logger.info({f"mean_{self.scoring.__name__}": float(np.mean(all_accuracies))})
         self._save_local_results()
 
     def _save_local_results(self):

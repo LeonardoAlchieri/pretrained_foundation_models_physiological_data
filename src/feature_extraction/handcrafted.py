@@ -283,6 +283,15 @@ class HandcraftedFeatureExtractor:
     
     def __init__(self, sampling_rate: int = 4):
         self.sampling_rate = sampling_rate
+        
+    def to_dict(self):
+        """
+        Returns a dictionary representation of the class.
+        """
+        return {
+            "name": self.__class__.__name__,
+            "sampling_rate": self.sampling_rate,
+        }
 
     def __call__(self, data: DataInfo) -> EDADataset:
         """
