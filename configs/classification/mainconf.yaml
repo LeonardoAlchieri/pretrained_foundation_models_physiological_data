@@ -1,25 +1,29 @@
 defaults:
   - _self_
-  - model: xgboost
-  - feature_extractor: handcrafted
+  - model: logistic_regression
+  - feature_extractor: chronos_large
   - validation_method: tacv
+  - resampling: group_undersampler
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
   # across channels
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
-  - aggregator: concat # accepted: concat, mean or none
+  - aggregator: mean_chan # accepted: mean_chan, mean_time or none
 
 seed: 1
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/usilaughs/data_right.npz}
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/bihearts/data_left.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
 
 engine:
   _target_: src.engine.Engine
   model: ${model}
-  scoring: accuracy
+  scoring: 
+    _target_: sklearn.metrics.balanced_accuracy_score
+    _partial_: true
   inner_cv_folds: 3
+  resampling: ${resampling}

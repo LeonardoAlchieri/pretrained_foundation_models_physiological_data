@@ -1,0 +1,4 @@
+_target_: src.engine.rebalancing.GroupUnderSampler
+sampling_strategy: 'auto'
+random_state: ${seed}
+replacement: false

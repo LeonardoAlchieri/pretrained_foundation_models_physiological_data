@@ -4,6 +4,7 @@ defaults:
   - feature_extractor: handcrafted
   - validation_method: lopo
   - aggregator: none
+  - resampling: group_undersampler
   - override hydra/sweeper: list
   
 seed: 42
@@ -33,3 +34,4 @@ engine:
   model: ${model}
   scoring: accuracy
   inner_cv_folds: 3
+  resampling: ${resampling}

@@ -1,12 +1,20 @@
 from pathlib import Path
+from typing import Callable
+from functools import partial
 
 import numpy as np
 import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    make_scorer,
+    balanced_accuracy_score,
+)
 from sklearn.model_selection import GridSearchCV
+from imblearn.under_sampling.base import BaseUnderSampler
 
 import wandb
 from src.data import EDADataset
@@ -15,16 +23,18 @@ from src.data import EDADataset
 class Engine:
     def __init__(
         self,
-        model,
-        scoring,
-        inner_cv_folds,
+        model: dict,
+        scoring: partial,
+        inner_cv_folds: int,
+        resampling: None | BaseUnderSampler | str = None,
     ):
         self.model = model["model"]
         self.param_grid = dict(model["param_grid"])
-        self.scoring = scoring
+        self.scoring: Callable = scoring.func
         self.inner_cv_folds = inner_cv_folds
         self.models = []  # Store best model for each fold
         self.fold_reports: dict[str, dict] = {}
+        self.resampling = resampling
 
     def fit(self, datamodule: EDADataset):
         self.models = []
@@ -35,11 +45,17 @@ class Engine:
             imputer = SimpleImputer(strategy="mean")
             X_train = imputer.fit_transform(X_train)
             self.imputers.append(imputer)
+
+            if self.resampling is not None:
+                X_train, y_train = self.resampling.fit_resample(
+                    X_train, y_train, group=Xy_train["groups"]
+                )
             clf = GridSearchCV(
                 self.model,
                 self.param_grid,
-                scoring=self.scoring,
+                scoring=make_scorer(self.scoring),
                 cv=self.inner_cv_folds,
+                verbose=1,
             )
             clf.fit(X_train, y_train)
             self.models.append(clf.best_estimator_)
@@ -53,22 +69,22 @@ class Engine:
             X_test = imputer.transform(X_test)
             model = self.models[fold_idx]
             y_pred = model.predict(X_test)
-            acc = accuracy_score(y_test, y_pred)
+            acc = self.scoring(y_true=y_test, y_pred=y_pred)
             report = classification_report(y_test, y_pred, output_dict=True)
             self.fold_reports[fold_idx] = report
             all_accuracies.append(acc)
 
-            wandb.log(
+            print(
                 {
-                    f"fold_{fold_idx+1}_accuracy": acc,
+                    f"fold_{fold_idx+1}_{self.scoring.__name__}": acc,
                     f"fold_{fold_idx+1}_report": report,
                 }
             )
-        wandb.log({"mean_accuracy": float(np.mean(all_accuracies))})
+        print({f"mean_{self.scoring.__name__}": float(np.mean(all_accuracies))})
         self._save_local_results()
 
     def _save_local_results(self):
         save_path = HydraConfig.get().runtime.output_dir
-        pd.DataFrame.from_dict(self.fold_reports, orient='index').to_csv(
+        pd.DataFrame.from_dict(self.fold_reports, orient="index").to_csv(
             Path(save_path) / f"reports.csv"
         )
