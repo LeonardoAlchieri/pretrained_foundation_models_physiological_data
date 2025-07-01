@@ -19,6 +19,7 @@ from tqdm.auto import tqdm
 
 # import wandb
 from src.data import EDADataset
+from joblib import parallel_backend
 
 
 class Engine:
@@ -40,31 +41,32 @@ class Engine:
     def fit(self, datamodule: EDADataset):
         self.models = []
         # self.fold_reports = {}
-        self.imputers = []  # Store imputers for each fold
-        for fold_idx, (Xy_train) in tqdm(
-            enumerate(datamodule.train_data_folds),
-            desc="Training folds",
-            total=len(datamodule.train_data_folds),
-        ):
-            X_train, y_train = Xy_train["features"], Xy_train["labels"]
-            imputer = SimpleImputer(strategy="mean")
-            X_train = imputer.fit_transform(X_train)
-            self.imputers.append(imputer)
+        with parallel_backend('threading', n_jobs=10):
+            self.imputers = []  # Store imputers for each fold
+            for fold_idx, (Xy_train) in tqdm(
+                enumerate(datamodule.train_data_folds),
+                desc="Training folds",
+                total=len(datamodule.train_data_folds),
+            ):
+                X_train, y_train = Xy_train["features"], Xy_train["labels"]
+                imputer = SimpleImputer(strategy="mean")
+                X_train = imputer.fit_transform(X_train)
+                self.imputers.append(imputer)
 
-            if self.resampling is not None:
-                X_train, y_train = self.resampling.fit_resample(
-                    X_train, y_train, group=Xy_train["groups"]
+                if self.resampling is not None:
+                    X_train, y_train = self.resampling.fit_resample(
+                        X_train, y_train, group=Xy_train["groups"]
+                    )
+                clf = GridSearchCV(
+                    self.model,
+                    self.param_grid,
+                    scoring=make_scorer(self.scoring),
+                    cv=self.inner_cv_folds,
+                    verbose=0,
                 )
-            clf = GridSearchCV(
-                self.model,
-                self.param_grid,
-                scoring=make_scorer(self.scoring),
-                cv=self.inner_cv_folds,
-                verbose=0,
-            )
-            clf.fit(X_train, y_train)
-            self.models.append(clf.best_estimator_)
-            # Optionally, store best params or scores
+                clf.fit(X_train, y_train)
+                self.models.append(clf.best_estimator_)
+                # Optionally, store best params or scores
 
     def test(self, datamodule: EDADataset):
         all_accuracies = []
