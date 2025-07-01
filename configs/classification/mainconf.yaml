@@ -16,9 +16,9 @@ seed: 1
 dataset: bihearts
 side: left
 
-hydra:
-  run:
-    dir: ./outputs/${dataset}/${side}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+# hydra:
+#   run:
+#     dir: ./outputs/${dataset}/${side}_${hydra:runtime.choices.model}_${hydra:runtime.choices.feature_extractor}/${hydra:runtime.choices.validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 datamodule:
   _target_: src.data.EDADataset

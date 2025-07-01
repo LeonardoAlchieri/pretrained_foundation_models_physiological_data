@@ -1,36 +1,13 @@
 defaults:
+  - mainconf
+  - override model: logistic_regression
+  - override feature_extractor: chronos_small
+  - override validation_method: lopo
   - _self_
-  - model: logistic_regression
-  - feature_extractor: chronos_small
-  - validation_method: lopo
-  - resampling: group_undersampler
-  # aggregator is the method used to aggregate the features across the channels. 
-  # Some feature extractors can accept the null: it means that the features can be computed
-  # across channels
-  # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
-  # just wrote down "None" in the code
-  - aggregator: mean_chan # accepted: mean_chan, mean_time or none
 
-seed: 1
-
-dataset: bihearts
-side: left
+override dataset: bihearts
+override side: left
 
 hydra:
   run:
-    dir: ./outputs/${dataset}/${side}_${model}_${feature_extractor}_${validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}
-
-datamodule:
-  _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
-  validation_method: ${validation_method}
-  feature_extractor: ${feature_extractor}
-
-engine:
-  _target_: src.engine.Engine
-  model: ${model}
-  scoring: 
-    _target_: sklearn.metrics.balanced_accuracy_score
-    _partial_: true
-  inner_cv_folds: 3
-  resampling: ${resampling}
+    dir: ./outputs/${dataset}/${side}_${hydra:runtime.choices.model}_${hydra:runtime.choices.feature_extractor}/${hydra:runtime.choices.validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}

@@ -1,12 +1,12 @@
 defaults:
   - mainconf
   - override model: logistic_regression
-  - override feature_extractor: chronos_small
-  - override validation_method: tacv
+  - override feature_extractor: handcrafted
+  - override validation_method: lopo
   - _self_
 
-override dataset: bihearts
-override side: left
+dataset: usilaughs
+side: right
 
 hydra:
   run:
