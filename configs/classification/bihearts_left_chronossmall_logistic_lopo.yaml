@@ -1,8 +1,8 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_large
-  - validation_method: tacv
+  - feature_extractor: chronos_small
+  - validation_method: lopo
   - resampling: group_undersampler
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
@@ -18,7 +18,7 @@ side: left
 
 hydra:
   run:
-    dir: ./outputs/${dataset}/${side}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: ./outputs/${dataset}/${side}_${model}_${feature_extractor}_${validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 datamodule:
   _target_: src.data.EDADataset
