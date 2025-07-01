@@ -29,6 +29,7 @@ class Engine:
         scoring: partial,
         inner_cv_folds: int,
         resampling: None | BaseUnderSampler | str = None,
+        n_jobs: int = 10,
     ):
         self.model = model["model"]
         self.param_grid = dict(model["param_grid"])
@@ -37,11 +38,12 @@ class Engine:
         self.models = []  # Store best model for each fold
         self.fold_reports: dict[str, dict] = {}
         self.resampling = resampling
+        self.n_jobs = n_jobs
 
     def fit(self, datamodule: EDADataset):
         self.models = []
         # self.fold_reports = {}
-        with parallel_backend('threading', n_jobs=10):
+        with parallel_backend('loky', n_jobs=self.n_jobs):
             self.imputers = []  # Store imputers for each fold
             for fold_idx, (Xy_train) in tqdm(
                 enumerate(datamodule.train_data_folds),
