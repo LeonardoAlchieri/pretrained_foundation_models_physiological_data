@@ -66,8 +66,10 @@ class EDADataset:
         Load the USI Laughs dataset.
         This method should be implemented to load the actual dataset.
         """
-        loaded_data = np.load(path, allow_pickle=True)
-        return dict(loaded_data)
+        loaded_data = dict(np.load(path, allow_pickle=True))
+        loaded_data['labels'] = loaded_data['labels'].reshape(-1)
+        loaded_data['groups'] = loaded_data['groups'].reshape(-1)
+        return loaded_data
 
     def _check_and_load_from_cache(self):
         if (Path(self.cache_path).exists()) and (not self.extracted_features):

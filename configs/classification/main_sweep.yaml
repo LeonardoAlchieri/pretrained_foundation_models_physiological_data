@@ -2,14 +2,14 @@ defaults:
   - _self_
   - model: logistic_regression
   - feature_extractor: handcrafted
-  - validation_method: lopo
+  - validation_method: tacv
   - aggregator: none
-  - resampling: group_undersampler
+  - resampling: none
   - override hydra/sweeper: list
   
 seed: 42
-dataset: usilaughs
-side: right
+dataset: seed
+side: engagement_10sec_medianthresh
 
 hydra:
   mode: MULTIRUN
