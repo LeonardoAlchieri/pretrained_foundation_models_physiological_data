@@ -1,20 +1,21 @@
+from functools import partial
 from pathlib import Path
 from typing import Callable
-from functools import partial
 
 import numpy as np
 import pandas as pd
 from hydra.core.hydra_config import HydraConfig
+from imblearn.under_sampling.base import BaseUnderSampler
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
+    balanced_accuracy_score,
     classification_report,
     make_scorer,
-    balanced_accuracy_score,
 )
 from sklearn.model_selection import GridSearchCV
-from imblearn.under_sampling.base import BaseUnderSampler
+from tqdm.auto import tqdm
 
 import wandb
 from src.data import EDADataset
@@ -40,7 +41,11 @@ class Engine:
         self.models = []
         # self.fold_reports = {}
         self.imputers = []  # Store imputers for each fold
-        for fold_idx, (Xy_train) in enumerate(datamodule.train_data_folds):
+        for fold_idx, (Xy_train) in tqdm(
+            enumerate(datamodule.train_data_folds),
+            desc="Training folds",
+            total=len(datamodule.train_data_folds),
+        ):
             X_train, y_train = Xy_train["features"], Xy_train["labels"]
             imputer = SimpleImputer(strategy="mean")
             X_train = imputer.fit_transform(X_train)
@@ -55,7 +60,7 @@ class Engine:
                 self.param_grid,
                 scoring=make_scorer(self.scoring),
                 cv=self.inner_cv_folds,
-                verbose=1,
+                verbose=0,
             )
             clf.fit(X_train, y_train)
             self.models.append(clf.best_estimator_)
@@ -63,7 +68,11 @@ class Engine:
 
     def test(self, datamodule: EDADataset):
         all_accuracies = []
-        for fold_idx, (Xy_test) in enumerate(datamodule.test_data_folds):
+        for fold_idx, (Xy_test) in tqdm(
+            enumerate(datamodule.test_data_folds),
+            desc="Testing folds",
+            total=len(datamodule.test_data_folds),
+        ):
             X_test, y_test = Xy_test["features"], Xy_test["labels"]
             imputer = self.imputers[fold_idx]
             X_test = imputer.transform(X_test)
