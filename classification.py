@@ -86,4 +86,10 @@ def main(cfg: DictConfig):
     
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("\n\n!!!!!!! An error occurred during the classification experiment.!!!!!!!\n\n")
+        logger.error(f"An error occurred: {e}")
+        # wandb.finish(exit_code=1)  # Finish the run with an error code
+        raise e
