@@ -1,15 +1,15 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: moment_large
+  - feature_extractor: chronos_large
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: group_undersampler
   - override hydra/sweeper: list
   
 seed: 42
-dataset: bihearts
-side: left
+dataset: usilaughs
+side: right
 
 hydra:
   mode: MULTIRUN
@@ -22,18 +22,19 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      # model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      # aggregator: none, none, mean_chan, mean_chan, mean_chan
-      # feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
-      model: logistic_regression, logistic_regression, logistic_regression
-      aggregator: mean_chan, mean_chan, mean_chan
-      feature_extractor: chronos_large, chronos_small, moment_large
+      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      aggregator: none, none, mean_chan, mean_chan, mean_chan
+      feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
+      # model: logistic_regression, logistic_regression, logistic_regression
+      # aggregator: mean_chan, mean_chan, mean_chan
+      # feature_extractor: chronos_large, chronos_small, moment_large
 
 datamodule:
   _target_: src.data.EDADataset
   path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
+  debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 
 engine:
   _target_: src.engine.Engine
@@ -44,3 +45,22 @@ engine:
   inner_cv_folds: 3
   resampling: ${resampling}
   n_jobs: 20
+  additional_metrics:
+    - _target_: sklearn.metrics.accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.balanced_accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.matthews_corrcoef
+      _partial_: true
+    - _target_: sklearn.metrics.f1_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.precision_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.recall_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.roc_auc_score
+      _partial_: true
+      average: macro

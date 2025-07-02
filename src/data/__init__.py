@@ -22,6 +22,7 @@ class EDADataset:
         path_to_data: str,
         validation_method: object,
         feature_extractor: object,
+        debug: bool = False,
     ):
         """
         Initialize the USI Laughs dataset.
@@ -34,6 +35,7 @@ class EDADataset:
         self.extracted_features: bool = False
         self.feature_extractor = feature_extractor
         self.cache_path = self._get_cache_path()
+        self.debug = debug
 
     def _get_cache_path(self) -> str:
         """
@@ -99,13 +101,28 @@ class EDADataset:
 
         if not inplace:
             return self
+        
+    def _reduce_size_for_debugging(self):
+        first_iteration = True
+        for key in self.data:
+            if isinstance(self.data[key], np.ndarray):
+                if self.data[key].ndim >= 1:
+                    if first_iteration:
+                        original_size = self.data[key].shape[0]
+                        reduced_size = min(original_size, 300)
+                        random_indices = np.random.choice(original_size, size=reduced_size, replace=False)
+                    self.data[key] = self.data[key][random_indices]
+        logger.info(
+            f"Reduced dataset size for debugging. Original size: {original_size}, Reduced size: {reduced_size}"
+        )
 
     def train_test_split(self, inplace: bool = False):
         if not self.extracted_features:
             raise RuntimeError(
                 "Features must be extracted before splitting the dataset."
             )
-
+        if self.debug:
+            self._reduce_size_for_debugging()
         self.train_data_folds, self.test_data_folds = self.validation_method(self.data)
 
         if not inplace:

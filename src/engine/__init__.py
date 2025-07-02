@@ -10,8 +10,12 @@ from imblearn.under_sampling.base import BaseUnderSampler
 from joblib import parallel_backend
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, balanced_accuracy_score,
-                             classification_report, make_scorer)
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    classification_report,
+    make_scorer,
+)
 from sklearn.model_selection import GridSearchCV
 from tqdm.auto import tqdm
 
@@ -21,11 +25,23 @@ from src.data import EDADataset
 logger = getLogger(__name__)
 
 
+def compute_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    metrics: list[Callable],
+) -> dict[str, float]: 
+    results = {}
+    for metric in metrics:
+        results[metric.__name__] = metric(y_true, y_pred)
+    return results
+
+
 class Engine:
     def __init__(
         self,
         model: dict,
         scoring: partial,
+        additional_metrics: list[partial],
         inner_cv_folds: int,
         resampling: None | BaseUnderSampler | str = None,
         n_jobs: int = 10,
@@ -38,11 +54,12 @@ class Engine:
         self.fold_reports: dict[str, dict] = {}
         self.resampling = resampling
         self.n_jobs = n_jobs
+        self.additional_metrics = [val.func for val in additional_metrics]
 
     def fit(self, datamodule: EDADataset):
         self.models = []
         # self.fold_reports = {}
-        with parallel_backend('threading', n_jobs=self.n_jobs):
+        with parallel_backend("threading", n_jobs=self.n_jobs):
             self.imputers = []  # Store imputers for each fold
             for fold_idx, (Xy_train) in tqdm(
                 enumerate(datamodule.train_data_folds),
@@ -82,7 +99,9 @@ class Engine:
             model = self.models[fold_idx]
             y_pred = model.predict(X_test)
             acc = self.scoring(y_true=y_test, y_pred=y_pred)
-            report = classification_report(y_test, y_pred, output_dict=True)
+            report = compute_metrics(
+                y_test, y_pred, metrics=self.additional_metrics
+            )
             self.fold_reports[fold_idx] = report
             all_accuracies.append(acc)
 
