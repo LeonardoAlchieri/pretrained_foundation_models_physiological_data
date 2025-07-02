@@ -44,7 +44,7 @@ def main(cfg: DictConfig):
     # Print the config in red color
     print("\033[91m")
     pprint(f"{OmegaConf.to_yaml(cfg)}")
-    print("\033[91m")
+    print("\033[0m")
     logger.info(f"{OmegaConf.to_yaml(cfg)}")
     
     seed_everything(cfg['seed'], workers=True)
