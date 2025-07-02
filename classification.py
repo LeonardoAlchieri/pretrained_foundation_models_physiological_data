@@ -8,6 +8,7 @@ from pytorch_lightning import seed_everything
 # set seeds for sklearn
 from sklearn.utils import check_random_state
 from logging import getLogger
+from pprint import pprint
 
 logger = getLogger(__name__)
 # import wandb
@@ -40,7 +41,9 @@ def main(cfg: DictConfig):
     #                  config=OmegaConf.to_container(cfg, resolve=True))
     
     logger.info("Starting classification experiment...")
-    logger.info("OmegaConf.to_yaml(cfg)")
+    # Print the config in red color
+    pprint(f"\033[91m{OmegaConf.to_yaml(cfg)}\033[0m")
+    logger.info(f"{OmegaConf.to_yaml(cfg)}")
     
     seed_everything(cfg['seed'], workers=True)
     check_random_state(cfg['seed'])

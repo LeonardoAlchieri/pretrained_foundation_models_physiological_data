@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 
 from src.utils.typing import DataInfo
-import pprint
+from pprint import pprint
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -48,7 +48,7 @@ class EDADataset:
         print("Feature extractor dict:")
         # Print the feature extractor dict in light blue
         print("\033[94m")  # Light blue ANSI escape code
-        pprint.pprint(feature_extractor_dict, indent=2, width=80, compact=False)
+        pprint(feature_extractor_dict, indent=2, width=80, compact=False)
         print("\033[0m")   # Reset color
 
         feature_extractor_str = str(feature_extractor_dict)
