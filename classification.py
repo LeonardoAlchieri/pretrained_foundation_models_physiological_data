@@ -43,7 +43,7 @@ def main(cfg: DictConfig):
     logger.info("Starting classification experiment...")
     # Print the config in red color
     print("\033[91m")
-    pprint(f"{OmegaConf.to_container(cfg)}")
+    pprint(OmegaConf.to_container(cfg), indent=2, width=80, compact=False)
     print("\033[0m")
     logger.info(f"{OmegaConf.to_yaml(cfg)}")
     
