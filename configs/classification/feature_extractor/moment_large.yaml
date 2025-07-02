@@ -1,6 +1,6 @@
 _target_: src.feature_extraction.moment.MOMENTExtractor
 model_name: "AutonLab/MOMENT-1-large"
-device_map: "cuda:0"
+device_map: ${device_map}
 torch_dtype: "auto"
 # TODO: add aggregator as parameter
 aggregator: ${aggregator}

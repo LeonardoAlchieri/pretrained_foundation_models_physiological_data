@@ -10,6 +10,7 @@ defaults:
 seed: 42
 dataset: usilaughs
 side: right
+device_map: "cuda:2"
 
 hydra:
   mode: MULTIRUN
