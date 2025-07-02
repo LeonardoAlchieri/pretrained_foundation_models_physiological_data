@@ -1,8 +1,8 @@
 model: 
     _target_: xgboost.XGBClassifier
+    device: ${device_map}
+    n_jobs: 30
 param_grid:
   n_estimators: [50, 100]
   max_depth: [3, 5]
   learning_rate: [0.01, 0.1]
-  n_jobs: [30]
-  device: [${device_map}]
