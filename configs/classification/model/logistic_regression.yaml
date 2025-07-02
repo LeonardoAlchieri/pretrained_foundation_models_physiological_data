@@ -5,4 +5,4 @@ param_grid:
   solver: ["lbfgs"]
   penalty: ["l2"]
   max_iter: [10000]
-  n_jobs: [20]
+  n_jobs: [1]
