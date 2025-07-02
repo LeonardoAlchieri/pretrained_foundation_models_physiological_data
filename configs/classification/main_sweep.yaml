@@ -8,8 +8,8 @@ defaults:
   - override hydra/sweeper: list
   
 seed: 42
-dataset: bihearts
-side: left
+dataset: usilaughs
+side: right
 device_map: "cuda:0"
 
 hydra:
@@ -23,12 +23,12 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      model: logistic_regression, logistic_regression
-      aggregator: mean_chan, mean_chan
-      feature_extractor: chronos_small, moment_large
-      # model: xgboost, xgboost, xgboost, xgboost
-      # aggregator: none, mean_chan, mean_chan, mean_chan
-      # feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
+      # model: logistic_regression, logistic_regression
+      # aggregator: mean_chan, mean_chan
+      # feature_extractor: chronos_small, moment_large
+      model: xgboost, xgboost, xgboost, xgboost
+      aggregator: none, mean_chan, mean_chan, mean_chan
+      feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
 
 datamodule:
   _target_: src.data.EDADataset
