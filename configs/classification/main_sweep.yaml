@@ -8,9 +8,9 @@ defaults:
   - override hydra/sweeper: list
   
 seed: 42
-dataset: apsync
-side: engagement_10sec
-device_map: "cuda:0"
+dataset: usilaughs
+side: right
+device_map: "mps"
 
 hydra:
   mode: MULTIRUN
@@ -45,7 +45,7 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
-  n_jobs: 20
+  n_jobs: 1
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true
