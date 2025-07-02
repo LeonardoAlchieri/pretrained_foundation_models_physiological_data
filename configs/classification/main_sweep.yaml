@@ -1,16 +1,16 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_large
+  - feature_extractor: chronos_small
   - validation_method: tacv
   - aggregator: mean_chan
-  - resampling: group_undersampler
+  - resampling: none
   - override hydra/sweeper: list
   
 seed: 42
-dataset: usilaughs
-side: right
-device_map: "cuda:2"
+dataset: apsync
+side: engagement_10sec
+device_map: "cuda:0"
 
 hydra:
   mode: MULTIRUN
@@ -23,12 +23,12 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      aggregator: none, none, mean_chan, mean_chan, mean_chan
-      feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
-      # model: logistic_regression, logistic_regression, logistic_regression
-      # aggregator: mean_chan, mean_chan, mean_chan
-      # feature_extractor: chronos_large, chronos_small, moment_large
+      # model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      # aggregator: none, none, mean_chan, mean_chan, mean_chan
+      # feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
+      model: xgboost, xgboost, xgboost, xgboost
+      aggregator: none, mean_chan, mean_chan, mean_chan
+      feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
 
 datamodule:
   _target_: src.data.EDADataset

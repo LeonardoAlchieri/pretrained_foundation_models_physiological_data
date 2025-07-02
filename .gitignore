@@ -74,6 +74,7 @@ outputs/
 multirun/
 outputs*/
 logs/
+tables_latex/
 
 # Weights and Biases
 wandb/
