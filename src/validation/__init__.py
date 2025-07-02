@@ -4,6 +4,7 @@ from sklearn.model_selection import GroupKFold
 
 from tqdm.auto import tqdm
 
+
 # FIXME: something wrong with this one
 class TACV:
     def __init__(self, num_folds: int):
@@ -24,7 +25,11 @@ class TACV:
         train_folds = []
         test_folds = []
 
-        for train_otherusers_indeces, test_user_indices in tqdm(gkf.split(features, labels, groups), desc='TACV Splitting'):
+        for train_otherusers_indeces, test_user_indices in tqdm(
+            gkf.split(features, labels, groups),
+            desc="TACV Splitting",
+            total=self.num_folds,
+        ):
             test_users = np.unique(groups[test_user_indices])
             train_indices = []
             train_indices.extend(train_otherusers_indeces)
@@ -43,18 +48,23 @@ class TACV:
                 train_indices.extend(label_1_indices[:split_point_1])
                 test_indices.extend(label_0_indices[split_point_0:])
                 test_indices.extend(label_1_indices[split_point_1:])
-            train_folds.append({
-                "features": features[train_indices],
-                "labels": labels[train_indices],
-                "groups": groups[train_indices],
-            })
-            test_folds.append({
-                "features": features[test_indices],
-                "labels": labels[test_indices],
-                "groups": groups[test_indices],
-            })
+            train_folds.append(
+                {
+                    "features": features[train_indices],
+                    "labels": labels[train_indices],
+                    "groups": groups[train_indices],
+                }
+            )
+            test_folds.append(
+                {
+                    "features": features[test_indices],
+                    "labels": labels[test_indices],
+                    "groups": groups[test_indices],
+                }
+            )
 
         return train_folds, test_folds
+
 
 class LOPO:
     def __init__(self):
@@ -73,18 +83,23 @@ class LOPO:
         unique_groups = np.unique(groups)
         train_folds = []
         test_folds = []
-        for group in tqdm(unique_groups, desc='LOPO Splitting'):
+        for group in tqdm(
+            unique_groups, desc="LOPO Splitting", total=len(unique_groups)
+        ):
             test_idx = np.where(groups == group)[0]
             train_idx = np.where(groups != group)[0]
-            train_folds.append({
-                "features": features[train_idx],
-                "labels": labels[train_idx],
-                "groups": groups[train_idx],
-            })
-            test_folds.append({
-                "features": features[test_idx],
-                "labels": labels[test_idx],
-                "groups": groups[test_idx],
-            })
+            train_folds.append(
+                {
+                    "features": features[train_idx],
+                    "labels": labels[train_idx],
+                    "groups": groups[train_idx],
+                }
+            )
+            test_folds.append(
+                {
+                    "features": features[test_idx],
+                    "labels": labels[test_idx],
+                    "groups": groups[test_idx],
+                }
+            )
         return train_folds, test_folds
-

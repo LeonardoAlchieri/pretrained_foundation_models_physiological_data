@@ -1,15 +1,15 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: handcrafted
+  - feature_extractor: moment_large
   - validation_method: tacv
-  - aggregator: none
-  - resampling: none
+  - aggregator: mean_chan
+  - resampling: group_undersampler
   - override hydra/sweeper: list
   
 seed: 42
-dataset: seed
-side: engagement_10sec_medianthresh
+dataset: bihearts
+side: left
 
 hydra:
   mode: MULTIRUN
@@ -22,9 +22,12 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      aggregator: none, none, mean_chan, mean_chan, mean_chan
-      feature_extractor: handcrafted, handcrafted, chronos_large, moment_large, chronos_small
+      # model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      # aggregator: none, none, mean_chan, mean_chan, mean_chan
+      # feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
+      model: logistic_regression, logistic_regression, logistic_regression
+      aggregator: mean_chan, mean_chan, mean_chan
+      feature_extractor: chronos_large, chronos_small, moment_large
 
 datamodule:
   _target_: src.data.EDADataset

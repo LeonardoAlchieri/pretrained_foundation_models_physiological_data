@@ -42,7 +42,7 @@ class Engine:
     def fit(self, datamodule: EDADataset):
         self.models = []
         # self.fold_reports = {}
-        with parallel_backend('loky', n_jobs=self.n_jobs):
+        with parallel_backend('threading', n_jobs=self.n_jobs):
             self.imputers = []  # Store imputers for each fold
             for fold_idx, (Xy_train) in tqdm(
                 enumerate(datamodule.train_data_folds),

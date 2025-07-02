@@ -6,6 +6,8 @@ from src.data import EDADataset
 from src.utils.config import check_aggregator
 from torch.utils.data import DataLoader
 
+from tqdm.auto import tqdm
+
 class MOMENTExtractor:
     """
     A class to extract handcrafted features from EDA signals.
@@ -25,6 +27,7 @@ class MOMENTExtractor:
             model_name,
             model_kwargs={"task_name": "embedding"},
         )
+        self.pipeline = self.pipeline.to(device_map)
         self.pipeline.init()
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
@@ -78,9 +81,9 @@ class MOMENTExtractor:
         dataloader = self._create_dataloader(vals)
         all_embeddings = []
 
-        for batch_data in dataloader:
-            batch_data = batch_data[0].to(self.device_map, dtype=self.torch_dtype)
-            batch_embeddings = self.pipeline(x_enc=batch_data).embeddings.numpy()
+        for batch_data in tqdm(dataloader, desc="Processing batches"):
+            batch_data = batch_data[0].to(self.device_map)
+            batch_embeddings = self.pipeline(x_enc=batch_data).embeddings.cpu().numpy()
             all_embeddings.append(batch_embeddings)
 
         return np.concatenate(all_embeddings, axis=0)
@@ -105,9 +108,9 @@ class MOMENTExtractor:
         dataloader = self._create_dataloader(channel_data)
         all_embeddings = []
 
-        for batch_data in dataloader:
-            batch_data = batch_data[0].to(self.device_map, dtype=self.torch_dtype)
-            batch_embeddings = self.pipeline(x_enc=batch_data).embeddings.numpy()
+        for batch_data in tqdm(dataloader, desc=f"Processing channel {channel_idx}"):
+            batch_data = batch_data[0].to(self.device_map)
+            batch_embeddings = self.pipeline(x_enc=batch_data).embeddings.cpu().numpy()
             all_embeddings.append(batch_embeddings)
 
         return np.concatenate(all_embeddings, axis=0)
