@@ -1,0 +1,67 @@
+defaults:
+  - _self_
+  - model: logistic_regression
+  - feature_extractor: chronos_small
+  - validation_method: tacv
+  - aggregator: mean_chan
+  - resampling: none
+  - override hydra/sweeper: list
+  
+seed: 42
+dataset: usilaughs
+side: right
+device_map: "cuda:0"
+
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/${dataset}-${side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
+  sweeper:
+    grid_params: 
+      seed: 42
+      validation_method: lopo, tacv
+    # standard grid search
+    list_params:
+      # model: logistic_regression, logistic_regression
+      # aggregator: mean_chan, mean_chan
+      # feature_extractor: chronos_small, moment_large
+      model: xgboost, xgboost, xgboost, xgboost
+      aggregator: none, mean_chan, mean_chan, mean_chan
+      feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
+
+datamodule:
+  _target_: src.data.EDADataset
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
+  validation_method: ${validation_method}
+  feature_extractor: ${feature_extractor}
+  debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
+
+engine:
+  _target_: src.engine.Engine
+  model: ${model}
+  scoring: 
+    _target_: sklearn.metrics.balanced_accuracy_score
+    _partial_: true
+  inner_cv_folds: 3
+  resampling: ${resampling}
+  n_jobs: 3
+  additional_metrics:
+    - _target_: sklearn.metrics.accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.balanced_accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.matthews_corrcoef
+      _partial_: true
+    - _target_: sklearn.metrics.f1_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.precision_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.recall_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.roc_auc_score
+      _partial_: true
+      average: macro
