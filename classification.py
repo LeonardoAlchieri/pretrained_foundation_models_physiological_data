@@ -42,7 +42,9 @@ def main(cfg: DictConfig):
     
     logger.info("Starting classification experiment...")
     # Print the config in red color
-    pprint(f"\033[91m{OmegaConf.to_yaml(cfg)}\033[0m")
+    print("\033[91m")
+    pprint(f"{OmegaConf.to_yaml(cfg)}")
+    print("\033[91m")
     logger.info(f"{OmegaConf.to_yaml(cfg)}")
     
     seed_everything(cfg['seed'], workers=True)
