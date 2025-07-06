@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_small
+  - feature_extractor: timemixer
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: none
@@ -10,7 +10,7 @@ defaults:
 seed: 42
 dataset: usilaughs
 side: right
-device_map: "cuda:0"
+device_map: "cpu"
 
 hydra:
   mode: MULTIRUN
@@ -23,12 +23,12 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      # model: logistic_regression, logistic_regression
-      # aggregator: mean_chan, mean_chan
-      # feature_extractor: chronos_small, moment_large
-      model: xgboost, xgboost, xgboost, xgboost
-      aggregator: none, mean_chan, mean_chan, mean_chan
-      feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
+      model: logistic_regression
+      aggregator: mean_chan
+      feature_extractor: timemixer
+      # model: xgboost, xgboost, xgboost, xgboost
+      # aggregator: none, mean_chan, mean_chan, mean_chan
+      # feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
 
 datamodule:
   _target_: src.data.EDADataset

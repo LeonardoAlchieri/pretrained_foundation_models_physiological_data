@@ -9,7 +9,7 @@ defaults:
   
 seed: 42
 dataset: apsync
-side: data_engagement_10sec
+side: engagement_10sec
 device_map: "cuda:0"
 
 hydra:
@@ -26,9 +26,9 @@ hydra:
       # model: logistic_regression, logistic_regression
       # aggregator: mean_chan, mean_chan
       # feature_extractor: chronos_small, moment_large
-      model: xgboost, xgboost, xgboost, xgboost
-      aggregator: none, mean_chan, mean_chan, mean_chan
-      feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
+      model: logistic_regression
+      aggregator: mean_chan
+      feature_extractor: timemixer
 
 datamodule:
   _target_: src.data.EDADataset

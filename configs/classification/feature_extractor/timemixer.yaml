@@ -1,0 +1,7 @@
+_target_: src.feature_extraction.timemixer.TimeMixerExtractor
+model_name: "ibm-granite/granite-timeseries-patchtsmixer"
+device_map: ${device_map}
+torch_dtype: "auto"
+aggregator: ${aggregator}
+batch_size: 32
+channel_together: true

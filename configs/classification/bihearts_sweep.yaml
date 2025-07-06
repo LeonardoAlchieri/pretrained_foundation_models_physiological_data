@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_small
+  - feature_extractor: timemixer
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: group_undersampler
@@ -23,9 +23,9 @@ hydra:
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      aggregator: none, none, mean_chan, mean_chan, mean_chan
-      feature_extractor: handcrafted, handcrafted, chronos_large, chronos_small, moment_large
+      model: logistic_regression
+      aggregator: mean_chan
+      feature_extractor: timemixer
       # model: xgboost, xgboost, xgboost, xgboost
       # aggregator: none, mean_chan, mean_chan, mean_chan
       # feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
