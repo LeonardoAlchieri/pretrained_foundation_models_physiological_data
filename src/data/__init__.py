@@ -63,7 +63,8 @@ class EDADataset:
             Path(self.path_to_data).parent / ".cache" / cache_filename
         )
 
-    def _load_data(self, path: str) -> DataInfo:
+    @staticmethod
+    def _load_data(path: str) -> DataInfo:
         """
         Load the USI Laughs dataset.
         This method should be implemented to load the actual dataset.
