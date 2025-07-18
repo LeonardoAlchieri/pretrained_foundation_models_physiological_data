@@ -1,17 +1,18 @@
+"""_summary_
+"""
+
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-from tqdm.auto import tqdm
-from transformers import PatchTSMixerForPrediction
-from scipy import signal
-
+from src.utils.typing import DataInfo
+from chronos import ChronosPipeline
 from src.data import EDADataset
 from src.utils.config import check_aggregator
-from src.utils.typing import DataInfo
+
+from tqdm.auto import tqdm
+from torch.utils.data import DataLoader, TensorDataset
 
 
-# TODO: create class from which the main configs are inherited for all feature extractors
-class TimeMixerExtractor:
+class SundialExtractor:
     """
     A class to extract handcrafted features from EDA signals.
     """
@@ -23,15 +24,17 @@ class TimeMixerExtractor:
         torch_dtype: torch.dtype = torch.float32,
         aggregator: object | str = "None",
         batch_size: int = 32,
-        channel_together: bool = True,
     ):
-        self.pipeline_name = model_name
+        self.model_name = model_name
         self.device_map = device_map
         self.torch_dtype = torch_dtype
-        self.pipeline = PatchTSMixerForPrediction.from_pretrained(self.pipeline_name)
+        self.pipeline = ChronosPipeline.from_pretrained(
+            model_name,
+            device_map=device_map,
+            torch_dtype=torch_dtype,
+        )
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
-        self.channel_together = channel_together
 
     def to_dict(self):
         """
@@ -75,8 +78,7 @@ class TimeMixerExtractor:
         # Concatenate all batch results
         return np.concatenate(all_embeddings, axis=0)
 
-    @staticmethod
-    def _pad_len(x: torch.Tensor, target_len: int) -> torch.Tensor:
+    def _pad_len(self, x: torch.Tensor, target_len: int) -> torch.Tensor:
         """
         Pads the input tensor to the target length.
 

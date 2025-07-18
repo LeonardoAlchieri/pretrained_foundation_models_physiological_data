@@ -1,20 +1,22 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_large
+  - feature_extractor: mantis
+  # - feature_extractor: chronos_large
   - validation_method: tacv
-  - resampling: group_undersampler
+  - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
   # across channels
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
-  - aggregator: mean_chan # accepted: mean_chan, mean_time or none
+  - aggregator: none # accepted: mean_chan, mean_time or none
 
 seed: 1
 
-dataset: bihearts
-side: left
+dataset: usilaughs
+side: right
+device_map: "mps"
 
 # hydra:
 #   run:
@@ -34,4 +36,23 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
-  n_jobs: 20
+  n_jobs: 3
+  additional_metrics:
+    - _target_: sklearn.metrics.accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.balanced_accuracy_score
+      _partial_: true
+    - _target_: sklearn.metrics.matthews_corrcoef
+      _partial_: true
+    - _target_: sklearn.metrics.f1_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.precision_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.recall_score
+      _partial_: true
+      average: macro
+    - _target_: sklearn.metrics.roc_auc_score
+      _partial_: true
+      average: macro
