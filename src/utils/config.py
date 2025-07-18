@@ -1,6 +1,7 @@
+from typing import Callable
 from omegaconf import DictConfig
 
-def check_aggregator(aggregator: object | str | DictConfig) -> object | str:
+def check_aggregator(aggregator: Callable | str | DictConfig) -> Callable | str:
     """
     Checks if the aggregator is a valid callable or a string.
 

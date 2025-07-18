@@ -10,7 +10,7 @@ defaults:
 seed: 42
 dataset: bihearts
 side: left
-device_map: "cuda:0"
+device_map: "mps"
 
 hydra:
   mode: MULTIRUN
@@ -24,8 +24,8 @@ hydra:
     # standard grid search
     list_params:
       model: logistic_regression
-      aggregator: mean_chan
-      feature_extractor: timemixer
+      aggregator: none
+      feature_extractor: mantis
       # model: xgboost, xgboost, xgboost, xgboost
       # aggregator: none, mean_chan, mean_chan, mean_chan
       # feature_extractor: handcrafted, chronos_large, chronos_small, moment_large
@@ -45,7 +45,7 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
-  n_jobs: 3
+  n_jobs: 2
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true

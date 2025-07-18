@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 
 
 def segment_eda_data(
-    data: pd.DataFrame, user: str, segment_length: int = 4, keys_to_get: list = ['engagement', 'immersion', 'enjoyment']
+    data: pd.DataFrame, user: str, keys_to_get: list, segment_length: int = 4, 
 ) -> pd.DataFrame:
     """
     Segments the EDA data into chunks of a specified length (in seconds).

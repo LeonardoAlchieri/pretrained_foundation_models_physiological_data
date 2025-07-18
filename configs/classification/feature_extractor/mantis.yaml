@@ -1,0 +1,6 @@
+_target_: src.feature_extraction.mantis.MantisExtractor
+model_name: "paris-noah/Mantis-8M"
+device_map: ${device_map}
+torch_dtype: "auto"
+aggregator: ${aggregator}
+batch_size: 128

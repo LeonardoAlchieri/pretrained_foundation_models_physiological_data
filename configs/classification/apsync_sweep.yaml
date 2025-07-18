@@ -1,16 +1,16 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_small
+  - feature_extractor: mantis
   - validation_method: tacv
-  - aggregator: mean_chan
+  - aggregator: none
   - resampling: none
   - override hydra/sweeper: list
   
 seed: 42
 dataset: apsync
 side: engagement_10sec
-device_map: "cuda:0"
+device_map: "mps"
 
 hydra:
   mode: MULTIRUN
@@ -27,8 +27,8 @@ hydra:
       # aggregator: mean_chan, mean_chan
       # feature_extractor: chronos_small, moment_large
       model: logistic_regression
-      aggregator: mean_chan
-      feature_extractor: timemixer
+      aggregator: none
+      feature_extractor: mantis
 
 datamodule:
   _target_: src.data.EDADataset

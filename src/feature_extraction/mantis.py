@@ -1,17 +1,18 @@
+from typing import Callable
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-from tqdm.auto import tqdm
-from transformers import PatchTSMixerForPrediction
-from scipy import signal
-
+from src.utils.typing import DataInfo
+from mantis.trainer import MantisTrainer
+from mantis.architecture import Mantis8M
 from src.data import EDADataset
 from src.utils.config import check_aggregator
-from src.utils.typing import DataInfo
+from scipy import signal
+
+from tqdm.auto import tqdm
+from torch.utils.data import DataLoader, TensorDataset
 
 
-# TODO: create class from which the main configs are inherited for all feature extractors
-class TimeMixerExtractor:
+class MantisExtractor:
     """
     A class to extract handcrafted features from EDA signals.
     """
@@ -21,14 +22,18 @@ class TimeMixerExtractor:
         model_name: str,
         device_map: str = "cpu",
         torch_dtype: torch.dtype = torch.float32,
-        aggregator: object | str = "None",
+        aggregator: Callable | str = "None",
         batch_size: int = 32,
         channel_together: bool = True,
     ):
         self.pipeline_name = model_name
+        self.model_name = model_name
         self.device_map = device_map
         self.torch_dtype = torch_dtype
-        self.pipeline = PatchTSMixerForPrediction.from_pretrained(self.pipeline_name)
+        network = Mantis8M(device=device_map)
+        self.network = network.from_pretrained(model_name)
+        # network.seq_len
+        self.pipeline = MantisTrainer(device=device_map, network=self.network)
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
         self.channel_together = channel_together
@@ -69,7 +74,7 @@ class TimeMixerExtractor:
             batch_data = channel_data[i:batch_end]
 
             # Process the batch
-            batch_embeddings = self.pipeline.embed(batch_data)[0].numpy()
+            batch_embeddings = self.pipeline.transform(batch_data)[0].numpy()
             all_embeddings.append(batch_embeddings)
 
         # Concatenate all batch results
@@ -125,28 +130,29 @@ class TimeMixerExtractor:
         if channel_data.ndim < 3:
             channel_data = channel_data.unsqueeze(2)
 
-        num_real_patches = (
-            1
-            + (channel_data.shape[1] - self.pipeline.config.patch_length)
-            // self.pipeline.config.patch_stride
-        )
+        # num_real_patches = (
+        #     1
+        #     + (channel_data.shape[1] - self.pipeline.config.patch_length)
+        #     // self.pipeline.config.patch_stride
+        # )
         dataset = TensorDataset(channel_data)
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_embeddings = []
         for batch in tqdm(dataloader, desc="Batch progress"):
             batch_data: torch.Tensor = batch[0]  # Extract the data from the batch
-            batch_data = self._pad_len(batch_data, self.pipeline.config.context_length)
+            batch_data = self._pad_len(batch_data, self.network.seq_len)
+            batch_data = batch_data.movedim(1, 2)  # Change shape to (batch_size, channels, time)
             batch_embeddings = (
-                self.pipeline(batch_data).last_hidden_state.detach().cpu().numpy()
+                self.pipeline.transform(batch_data)
             )
-            batch_embeddings = batch_embeddings[:, :, :num_real_patches, :]
+            # batch_embeddings = batch_embeddings[:, :, :num_real_patches, :]
             # swap axis 0 and 1 to have shape (channels,batch_size,time,features) from (batch_size, channels, time, features)
-            batch_embeddings = np.transpose(batch_embeddings, (1, 0, 2, 3))
+            # batch_embeddings = np.transpose(batch_embeddings, (1, 0, 2, 3))
             all_embeddings.append(batch_embeddings)
 
         # Concatenate all batch results
-        return np.concatenate(all_embeddings, axis=1)
+        return np.concatenate(all_embeddings, axis=0)
 
     def __call__(self, data: DataInfo) -> EDADataset:
         """
@@ -163,8 +169,9 @@ class TimeMixerExtractor:
             The dataset with extracted features.
         """
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
-        if self.aggregator == "None":
+        if self.aggregator != "None":
             # return an array of shape (batch_size, 1), where the value is 0
+            UserWarning("Mantis does not require a channel aggregator")
             features = np.zeros((vals.shape[0], 1), dtype=np.float32)
         else:
             if not self.channel_together:
@@ -173,14 +180,14 @@ class TimeMixerExtractor:
                 channel_features = []
                 for i in range(vals.shape[2]):
                     channel_embeddings = self._process_channel_with_dataloader(
-                        vals[..., i]
+                        vals[..., [i]]
                     )
                     channel_features.append(channel_embeddings[0, ...])
             else:
                 # Process all channels together
                 channel_features = self._process_channel_with_dataloader(vals)
 
-            features: np.ndarray = self.aggregator(channel_features)
+            features: np.ndarray = channel_features
 
         features = np.ma.masked_invalid(features, copy=False)
         data["features"] = features.reshape(features.shape[0], -1)

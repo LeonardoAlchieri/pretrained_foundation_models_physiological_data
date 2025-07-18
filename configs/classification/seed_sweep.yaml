@@ -10,7 +10,7 @@ defaults:
 seed: 42
 dataset: seed
 side: engagement_10sec_35thresh
-device_map: "cuda:0"
+device_map: "mps"
 
 hydra:
   mode: MULTIRUN
@@ -27,8 +27,8 @@ hydra:
       # aggregator: mean_chan, mean_chan
       # feature_extractor: chronos_small, moment_large
       model: logistic_regression
-      aggregator: mean_chan
-      feature_extractor: timemixer
+      aggregator: none
+      feature_extractor: mantis
 
 datamodule:
   _target_: src.data.EDADataset
