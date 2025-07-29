@@ -195,16 +195,7 @@ device_map: ${device_map}
 If you use this codebase in your research, please cite:
 
 ```bibtex
-@inproceedings{alchieri2025pretrained,
-  title={Pretrained Foundation Models for Physiological Data: A Comprehensive Evaluation on EDA Classification Tasks},
-  author={Alchieri, Leonardo and Smith, Jane and Johnson, Robert},
-  booktitle={Proceedings of the 39th Conference on Neural Information Processing Systems (NeurIPS 2025)},
-  pages={1--12},
-  year={2025},
-  organization={Curran Associates, Inc.},
-  address={Vancouver, Canada},
-  url={https://proceedings.neurips.cc/paper/2025/hash/abc123def456-Abstract.html}
-}
+...
 ```
 
 ## 🤝 Contributing

@@ -1,34 +1,36 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: timemixer
+  - feature_extractor: none
   - validation_method: tacv
-  - aggregator: mean_chan
+  - aggregator: none
   - resampling: none
   - override hydra/sweeper: list
   
 seed: 42
-dataset: seed
-side: engagement_10sec_35thresh
+dataset: apsync
+side: engagement_10sec_4thresh
 device_map: "mps"
 
 hydra:
   mode: MULTIRUN
   sweep:
-    dir: "outputs/${dataset}-${side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
-    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
+    dir: "outputs/none_sweep/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    # FIXME: when using runtime.choices with a string, it returns "None"
+    # subdir: "${hydra:runtime.choices}-${hydra:runtime.choices.validation_method}"
   sweeper:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
     # standard grid search
     list_params:
-      # model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      # aggregator: none, none, mean_chan, mean_chan, none, mean_chan, mean_chan
-      # feature_extractor: handcrafted, handcrafted, chronos_small, chronos_large, mantis, moment_large, timemixer
-      model: logistic_regression
-      aggregator: mean_chan
-      feature_extractor: chronos_large
+      # dataset: apsync, seed, usilaughs, bihearts
+      # side: engagement_10sec_4thresh, engagement_10sec_35thresh, right, left
+      # resampling: none, none, none, group_undersampler
+      dataset: apsync, apsync, apsync, apsync
+      side: enjoyment_10sec, immersion_10sec, engagement_10sec_35thresh, engagement_10sec_medianthresh
+      resampling: none, none, none, none
+
 
 datamodule:
   _target_: src.data.EDADataset
