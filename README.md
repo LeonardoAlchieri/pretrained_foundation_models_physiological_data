@@ -69,10 +69,12 @@ python classification.py feature_extractor=moment_large model=logistic_regressio
 
 The framework supports four EDA datasets:
 
-- **USILaughs**: Emotional response classification from laughter analysis
-- **SEED**: Engagement detection from emotional EEG-EDA recordings  
-- **BiHeartS**: Cardiac-related physiological state classification
-- **APSYNC**: Synchrony-based engagement detection
+- **USILaughs**: congitive load/relaxation classification
+- **SEED**: low/high engagement
+- **BiHeartS**: sleep/wake
+- **APSYNC**: low/high engagement; this dataset can be used for enjoyment and immersion
+
+These datasets can be shared, either in raw format or in the pre-processed format used in this work, upon signing a data sharing agreement.
 
 ### Data Format
 
@@ -137,26 +139,12 @@ python classification.py --config-name=bihearts_sweep --multirun
 python classification.py --config-name=apsync_sweep --multirun
 ```
 
-### Custom Experiments
-
-```bash
-# Compare foundation models
-python classification.py --multirun feature_extractor=moment_large,chronos_large,mantis
-
-# Validation strategy comparison
-python classification.py --multirun validation_method=lopo,tacv
-
-# Aggregation method analysis
-python classification.py --multirun aggregator=mean_chan,mean_time,concat
-```
-
 ## 📊 Results Analysis
 
 The repository includes Jupyter notebooks for result analysis:
 
 - `check_results_final.ipynb`: Comprehensive results comparison
 - `data_distribution.ipynb`: Dataset statistics and visualization
-- `foundation_models_testing.ipynb`: Model architecture exploration
 
 Results are automatically saved to `outputs/` with timestamp and configuration details.
 
@@ -200,7 +188,7 @@ If you use this codebase in your research, please cite:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.
+We welcome contributions!
 
 ## 📄 License
 
@@ -216,8 +204,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions or collaboration opportunities, please contact:
-- Leonardo Alchieri: [leonardo.alchieri@example.com](mailto:leonardo.alchieri@example.com)
-- Research Group: [https://example-research-group.com](https://example-research-group.com)
+- Leonardo Alchieri: [leonardo.alchieri@usi.cj](mailto:leonardo.alchieri@usi.cj)
+- Research Group: [https://pc.inf.usi.ch](https://pc.inf.usi.ch)
 
 ---
 
