@@ -21,14 +21,10 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-    # standard grid search
     list_params:
-      # model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression
-      # aggregator: none, none, mean_chan, mean_chan, none, mean_chan, mean_chan
-      # feature_extractor: handcrafted, handcrafted, chronos_small, chronos_large, mantis, moment_large, timemixer
-      model: logistic_regression
-      aggregator: mean_chan
-      feature_extractor: chronos_large
+      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      aggregator: none, none, mean_chan, mean_chan, none, mean_chan, mean_chan
+      feature_extractor: handcrafted, handcrafted, chronos_small, chronos_large, mantis, moment_large, timemixer
 
 datamodule:
   _target_: src.data.EDADataset

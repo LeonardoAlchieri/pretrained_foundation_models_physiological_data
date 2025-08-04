@@ -1,2 +1,3 @@
 _target_: src.validation.TACV    
 num_folds: 5
+# TODO: make the proportion of train-test not hardcoded

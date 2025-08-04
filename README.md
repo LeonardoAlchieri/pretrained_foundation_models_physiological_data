@@ -141,12 +141,24 @@ python classification.py --config-name=apsync_sweep --multirun
 
 ## 📊 Results Analysis
 
-The repository includes Jupyter notebooks for result analysis:
+The repository includes Jupyter notebooks for result analysis in the `notebooks/` folder:
 
-- `check_results_final.ipynb`: Comprehensive results comparison
 - `data_distribution.ipynb`: Dataset statistics and visualization
+- `visualize_results.ipynb`: Comprehensive results comparison and visualization
 
 Results are automatically saved to `outputs/` with timestamp and configuration details.
+
+### Additional Notebooks
+
+The `additional_notebook/` folder contains notebooks that were used during the initial development phases and are kept for reference purposes only. These notebooks are no longer actively maintained and should not be used for current analysis:
+
+- `APSYNC_preparation.ipynb`: Legacy data preparation for APSYNC dataset
+- `BiHeartS_prepatation.ipynb`: Legacy data preparation for BiHeartS dataset  
+- `SEED_preparation.ipynb`: Legacy data preparation for SEED dataset
+- `USILaughs_preparation.ipynb`: Legacy data preparation for USILaughs dataset
+- `checking_data.ipynb`: Legacy data validation notebook
+- `checking_results.ipynb`: Legacy results checking notebook
+- `foundation_models_testing.ipynb`: Legacy model testing notebook
 
 ## 🔧 Extending the Framework
 

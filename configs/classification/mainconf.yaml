@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: mantis
+  - feature_extractor: handcrafted
   # - feature_extractor: chronos_large
   - validation_method: tacv
   - resampling: none
@@ -12,11 +12,13 @@ defaults:
   # just wrote down "None" in the code
   - aggregator: none # accepted: mean_chan, mean_time or none
 
-seed: 1
+seed: 42
 
 dataset: usilaughs
 side: right
+label_name: cognitiveload
 device_map: "mps"
+sampling_rate: 4 # Hz
 
 # hydra:
 #   run:
@@ -24,7 +26,7 @@ device_map: "mps"
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}_${label_name}.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
 

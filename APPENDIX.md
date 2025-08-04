@@ -115,27 +115,26 @@ and a simple concatenation, where we just concatenate across all dimensions. We 
 
 ### Table E: Mathematical formulas for the 9 computed hand-crafted time-domain features, the 2 EDA-specific features and the 4 frequency-domain features
 
-We compute these features for the three EDA components, i.e., tonic, phasic and “mixed”, for a total of 45 features.
+We compute these features for the three EDA components, i.e., tonic, phasic and "mixed", for a total of 45 features.
 
-| Feature                                  | Mathematical Notation or Formula                                                                                  |
-|------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| **Time domain**                          |                                                                                                                    |
-| Mean                                     | \( \displaystyle \frac{1}{N}\sum_{i=1}^N x_i \)                                                                     |
-| Minimum                                  | \( \displaystyle \min(x_1, x_2, \dots, x_N) \)                                                                     |
-| Maximum                                  | \( \displaystyle \max(x_1, x_2, \dots, x_N) \)                                                                     |
-| Standard Deviation                       | \( \displaystyle \sqrt{\frac{1}{N-1}\sum_{i=1}^N \bigl(x_i - \bar{x}\bigr)^2} \)                                    |
-| Dynamic Range                            | \( \displaystyle \max(x_1, \dots, x_N) - \min(x_1, \dots, x_N) \)                                                   |
-| Slope                                    | \( \displaystyle \frac{x_N - x_1}{N - 1} \)                                                                         |
-| Absolute Value of Slope                  | \( \displaystyle \biggl|\frac{x_N - x_1}{N - 1}\biggr| \)                                                           |
-| Mean of the First Derivative            | \( \displaystyle \frac{1}{N-1}\sum_{i=1}^{N-1} (x_{i+1} - x_i) \)                                                    |
-| Standard Deviation of the First Derivative | \( \displaystyle \sqrt{\frac{1}{N-2}\sum_{i=1}^{N-1}\bigl((x_{i+1}-x_i) - \overline{(x_{i+1}-x_i)}\bigr)^2} \)      |
-| **EDA-specific features**                |                                                                                                                    |
-| Number of EDA Peaks in a Window         | Count of local maxima in the windowed EDA signal                                                                   |
-| Amplitude of EDA Peaks                   | Amplitude of local maxima in the windowed EDA signal                                                               |
-| **Frequency domain** (Fast Fourier Transform) |                                                                                                                |
-| Direct Current                           | \( X_0 \)                                                                                                          |
-| Sum of frequency coefficients           | \( \displaystyle \sum_{k=1}^N \lvert X_k\rvert \)                                                                  |
-| Information entropy                      | \( \displaystyle \sum_{k=1}^N P(X_k)\,\log_2\bigl(P(X_k)\bigr) \)                                                   |
-| Spectral energy                          | \( \displaystyle \sum_{k=1}^N \lvert X_k\rvert^2 \)                                                                |
-
-:contentReference[oaicite:1]{index=1}
+| Feature | Mathematical Formula |
+|---------|---------------------|
+| **Time domain** | |
+| Mean | $\frac{1}{N}\sum_{i=1}^N x_i$ |
+| Minimum | $\min(x_1, x_2, \ldots, x_N)$ |
+| Maximum | $\max(x_1, x_2, \ldots, x_N)$ |
+| Standard Deviation | $\sqrt{\frac{1}{N-1}\sum_{i=1}^N (x_i - \bar{x})^2}$ |
+| Dynamic Range | $\max(x_1, \ldots, x_N) - \min(x_1, \ldots, x_N)$ |
+| Slope | $\frac{x_N - x_1}{N - 1}$ |
+| Absolute Value of Slope | $\left\|\frac{x_N - x_1}{N - 1}
+ight\|$ |
+| Mean of the First Derivative | $\frac{1}{N-1}\sum_{i=1}^{N-1} (x_{i+1} - x_i)$ |
+| Standard Deviation of the<br/>First Derivative | $\sqrt{\frac{1}{N-2}\sum_{i=1}^{N-1}((x_{i+1}-x_i) - \overline{(x_{i+1}-x_i)})^2}$ |
+| **EDA-specific features** | |
+| Number of EDA Peaks in a Window | Count of local maxima in the windowed EDA signal |
+| Amplitude of EDA Peaks | Amplitude of local maxima in the windowed EDA signal |
+| **Frequency domain**<br/>(Fast Fourier Transform) | |
+| Direct Current | $X_0$ |
+| Sum of frequency coefficients | $\sum_{k=1}^N \|X_k\|$ |
+| Information entropy | $\sum_{k=1}^N P(X_k) \log_2(P(X_k))$ |
+| Spectral energy | $\sum_{k=1}^N \|X_k\|^2$ |
