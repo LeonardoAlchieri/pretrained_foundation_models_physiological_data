@@ -1,34 +1,43 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: handcrafted
-  # - feature_extractor: chronos_large
+  - feature_extractor: none
   - validation_method: tacv
+  - aggregator: none
   - resampling: none
-  # aggregator is the method used to aggregate the features across the channels. 
-  # Some feature extractors can accept the null: it means that the features can be computed
-  # across channels
-  # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
-  # just wrote down "None" in the code
-  - aggregator: none # accepted: mean_chan, mean_time or none
-
+  - override hydra/sweeper: list
+  
 seed: 42
-
-dataset: usilaughs
-side: right
-label_name: cognitiveload
+dataset: apsync
+side: engagement_10sec_4thresh
 device_map: "mps"
-sampling_rate: 4 # Hz
 
-# hydra:
-#   run:
-#     dir: ./outputs/${dataset}/${side}_${hydra:runtime.choices.model}_${hydra:runtime.choices.feature_extractor}/${hydra:runtime.choices.validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/none_sweep/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    # FIXME: when using runtime.choices with a string, it returns "None"
+    # subdir: "${hydra:runtime.choices}-${hydra:runtime.choices.validation_method}"
+  sweeper:
+    grid_params: 
+      seed: 42
+      validation_method: lopo, tacv
+    # standard grid search
+    list_params:
+      # dataset: apsync, seed, usilaughs, bihearts
+      # side: engagement_10sec_4thresh, engagement_10sec_35thresh, right, left
+      # resampling: none, none, none, group_undersampler
+      dataset: apsync, apsync, apsync, apsync
+      side: enjoyment_10sec, immersion_10sec, engagement_10sec_35thresh, engagement_10sec_medianthresh
+      resampling: none, none, none, none
+
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}_${label_name}.npz}
+  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
+  debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 
 engine:
   _target_: src.engine.Engine

@@ -7,14 +7,17 @@ from tqdm.auto import tqdm
 
 
 def segment_eda_data(
-    data: pd.DataFrame, user: str, keys_to_get: list, segment_length: int = 4, 
+    data: pd.DataFrame,
+    user: str,
+    keys_to_get: list,
+    segment_length: int = 4,
 ) -> pd.DataFrame:
     """
     Segments the EDA data into chunks of a specified length (in seconds).
     """
     segment_length = int(data.attrs["sampling_rate"]) * segment_length
     segments = []
-    
+
     values_to_get = {key: [] for key in keys_to_get}
     groups = []
     for start in range(0, len(data), segment_length):
@@ -29,14 +32,15 @@ def segment_eda_data(
 
     return segments, *values_to_get.values(), groups
 
+
 def process_empatica_data(data: np.ndarray) -> pd.DataFrame:
     initial_timestamp = data[0]
     sampling_rate = data[1]
     values = data[2:]
     timestamps = np.arange(
         initial_timestamp,
-        initial_timestamp + len(values) * sampling_rate,
-        sampling_rate,
+        initial_timestamp + len(values) / sampling_rate,
+        1 / sampling_rate,
     )
     df = pd.DataFrame({"Timestamp": timestamps, "EDA": values})
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], unit="s")
@@ -62,6 +66,7 @@ def split_data_into_sessions(data: np.ndarray, session_data: pd.DataFrame) -> di
             sessions[session_key] = selected_data
     return sessions
 
+
 # filtering
 def apply_filter(
     data: pd.DataFrame, cutoff_frequency: float, butterworth_order: int
@@ -78,15 +83,20 @@ def apply_filter(
     data["EDA"] = filtered_data
     return data
 
+
 # cvxeda decomposition
-def decompose_signal(data: pd.DataFrame) -> pd.DataFrame:
+def decompose_signal(data: pd.DataFrame) -> pd.DataFrame | None:
     """
     Decomposes the EDA signal into tonic and phasic components.
     This is a placeholder function; replace with actual decomposition logic.
     """
     # Placeholder for actual decomposition logic
-    decomposed = decomposition(data["EDA"].values)
-    
+    try:
+        decomposed = decomposition(data["EDA"].values)
+    except:
+        UserWarning(
+            f"Decomposition failed. Returning None")
+        return None
     data["Tonic"] = decomposed["tonic component"]
     data["Phasic"] = decomposed["phasic component"]
-    return data 
+    return data

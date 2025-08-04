@@ -1,5 +1,6 @@
 *.nosync
 .DS_Store
+tables*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -69,10 +69,12 @@ python classification.py feature_extractor=moment_large model=logistic_regressio
 
 The framework supports four EDA datasets:
 
-- **USILaughs**: Emotional response classification from laughter analysis
-- **SEED**: Engagement detection from emotional EEG-EDA recordings  
-- **BiHeartS**: Cardiac-related physiological state classification
-- **APSYNC**: Synchrony-based engagement detection
+- **USILaughs**: congitive load/relaxation classification
+- **SEED**: low/high engagement
+- **BiHeartS**: sleep/wake
+- **APSYNC**: low/high engagement; this dataset can be used for enjoyment and immersion
+
+These datasets can be shared, either in raw format or in the pre-processed format used in this work, upon signing a data sharing agreement.
 
 ### Data Format
 
@@ -137,28 +139,26 @@ python classification.py --config-name=bihearts_sweep --multirun
 python classification.py --config-name=apsync_sweep --multirun
 ```
 
-### Custom Experiments
-
-```bash
-# Compare foundation models
-python classification.py --multirun feature_extractor=moment_large,chronos_large,mantis
-
-# Validation strategy comparison
-python classification.py --multirun validation_method=lopo,tacv
-
-# Aggregation method analysis
-python classification.py --multirun aggregator=mean_chan,mean_time,concat
-```
-
 ## 📊 Results Analysis
 
-The repository includes Jupyter notebooks for result analysis:
+The repository includes Jupyter notebooks for result analysis in the `notebooks/` folder:
 
-- `check_results_final.ipynb`: Comprehensive results comparison
 - `data_distribution.ipynb`: Dataset statistics and visualization
-- `foundation_models_testing.ipynb`: Model architecture exploration
+- `visualize_results.ipynb`: Comprehensive results comparison and visualization
 
 Results are automatically saved to `outputs/` with timestamp and configuration details.
+
+### Additional Notebooks
+
+The `additional_notebook/` folder contains notebooks that were used during the initial development phases and are kept for reference purposes only. These notebooks are no longer actively maintained and should not be used for current analysis:
+
+- `APSYNC_preparation.ipynb`: Legacy data preparation for APSYNC dataset
+- `BiHeartS_prepatation.ipynb`: Legacy data preparation for BiHeartS dataset  
+- `SEED_preparation.ipynb`: Legacy data preparation for SEED dataset
+- `USILaughs_preparation.ipynb`: Legacy data preparation for USILaughs dataset
+- `checking_data.ipynb`: Legacy data validation notebook
+- `checking_results.ipynb`: Legacy results checking notebook
+- `foundation_models_testing.ipynb`: Legacy model testing notebook
 
 ## 🔧 Extending the Framework
 
@@ -195,21 +195,12 @@ device_map: ${device_map}
 If you use this codebase in your research, please cite:
 
 ```bibtex
-@inproceedings{alchieri2025pretrained,
-  title={Pretrained Foundation Models for Physiological Data: A Comprehensive Evaluation on EDA Classification Tasks},
-  author={Alchieri, Leonardo and Smith, Jane and Johnson, Robert},
-  booktitle={Proceedings of the 39th Conference on Neural Information Processing Systems (NeurIPS 2025)},
-  pages={1--12},
-  year={2025},
-  organization={Curran Associates, Inc.},
-  address={Vancouver, Canada},
-  url={https://proceedings.neurips.cc/paper/2025/hash/abc123def456-Abstract.html}
-}
+...
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.
+We welcome contributions!
 
 ## 📄 License
 
@@ -225,8 +216,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions or collaboration opportunities, please contact:
-- Leonardo Alchieri: [leonardo.alchieri@example.com](mailto:leonardo.alchieri@example.com)
-- Research Group: [https://example-research-group.com](https://example-research-group.com)
+- Leonardo Alchieri: [leonardo.alchieri@usi.cj](mailto:leonardo.alchieri@usi.cj)
+- Research Group: [https://pc.inf.usi.ch](https://pc.inf.usi.ch)
 
 ---
 

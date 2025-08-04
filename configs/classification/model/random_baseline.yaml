@@ -1,5 +1,5 @@
 model: 
     _target_: sklearn.dummy.DummyClassifier
-    seed: ${seed}
+    random_state: ${seed}
 param_grid:
   strategy: ["most_frequent", "stratified", "uniform", "prior"]

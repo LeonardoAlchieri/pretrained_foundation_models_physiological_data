@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: timemixer
+  - feature_extractor: chronos_large
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: none
@@ -13,7 +13,7 @@ side: engagement_10sec_35thresh
 device_map: "mps"
 
 hydra:
-  mode: MULTIRUN
+  mode: RUN
   sweep:
     dir: "outputs/${dataset}-${side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
     subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
@@ -21,14 +21,10 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-    # standard grid search
     list_params:
-      # model: logistic_regression, logistic_regression
-      # aggregator: mean_chan, mean_chan
-      # feature_extractor: chronos_small, moment_large
-      model: logistic_regression
-      aggregator: none
-      feature_extractor: mantis
+      model: random_baseline, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression, logistic_regression
+      aggregator: none, none, mean_chan, mean_chan, none, mean_chan, mean_chan
+      feature_extractor: handcrafted, handcrafted, chronos_small, chronos_large, mantis, moment_large, timemixer
 
 datamodule:
   _target_: src.data.EDADataset
