@@ -1,9 +1,11 @@
-from src.preprocessing.filter import butter_lowpass_filter_filtfilt
-import pandas as pd
-import numpy as np
 from sys import path
-from src.preprocessing.decomposition import decomposition
+
+import numpy as np
+import pandas as pd
 from tqdm.auto import tqdm
+
+from src.preprocessing.decomposition import decomposition
+from src.preprocessing.filter import butter_lowpass_filter_filtfilt
 
 
 def segment_eda_data(

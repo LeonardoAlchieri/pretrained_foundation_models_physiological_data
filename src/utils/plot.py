@@ -1,8 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 def plot_categorical_distribution(
     labels: np.ndarray,
@@ -25,9 +24,6 @@ def plot_categorical_distribution(
         figsize        : figure size.
         palette        : seaborn palette for bars.
     """
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import seaborn as sns
 
     # 1) LaTeX settings
     if use_latex:

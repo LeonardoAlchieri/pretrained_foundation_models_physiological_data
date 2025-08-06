@@ -1,4 +1,5 @@
 from typing import TypedDict
+
 import numpy as np
 
 DataInfo = TypedDict(

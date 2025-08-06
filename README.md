@@ -195,7 +195,17 @@ device_map: ${device_map}
 If you use this codebase in your research, please cite:
 
 ```bibtex
-...
+@inproceedings{alchieri_exploring_2025,
+	address = {Espoo, Finland},
+	title = {Exploring Generalist Foundation Models for Time Series of Electrodermal Activity Data},
+	isbn = {979-8-4007-1477-1},
+	doi = {10.1145/3714394.3756186},
+	language = {en},
+	booktitle = {Companion of the 2025 {ACM} {International} {Joint} {Conference} on {Pervasive} and {Ubiquitous} {Computing}},
+	author = {Alchieri, Leonardo and Candian, Lino and Alecci, Lidia and Abdalazim, Nouran},
+	year = {2025},
+}
+
 ```
 
 ## 🤝 Contributing
@@ -216,7 +226,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions or collaboration opportunities, please contact:
-- Leonardo Alchieri: [leonardo.alchieri@usi.cj](mailto:leonardo.alchieri@usi.cj)
+- Leonardo Alchieri: [leonardo.alchieri@usi.ch](mailto:leonardo.alchieri@usi.ch)
 - Research Group: [https://pc.inf.usi.ch](https://pc.inf.usi.ch)
 
 ---
