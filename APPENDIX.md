@@ -13,9 +13,7 @@ We present, in Table C and Table D, detailed results for the LOPO and 5-fold TAc
 Using the same method, we also select the baseline classifier. We use a 3-fold cross validation over the train set for the following baseline classifiers: _most frequent_, which always predicts the majority class according to the training set; _stratified_, also known as biased random guess, which predicts the label distribution from the training set; _uniform_, which predicts the labels using a uniform distribution.
 
 **Embeddings concatenation.** As we report in Section 4, to obtain our results we average the foundation model features along the EDA components. We report here two additional strategies that we tested: time averaging, where we average across the time axis, i.e.,  
-$$
-\mathbf{e} \;\to\; \frac{1}{T}\sum_{t=1}^T \mathbf{e}_t
-$$  
+$\mathbf{e} \to \frac{1}{T}\sum_{t=1}^T \mathbf{e}_t$,
 and a simple concatenation, where we just concatenate across all dimensions. We compare the performance of these two strategies, along with the channel-averaging strategy, on the USILaughs only in ??. Our results show that no significant difference is present between the three strategies.
 
 **Foundation models.** We use pre-trained weights available as open source for all three of the foundation models. We report in Table A the link to both the repository with the code and the model weights for all three foundation models.
