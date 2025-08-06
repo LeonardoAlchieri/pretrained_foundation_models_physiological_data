@@ -1,13 +1,12 @@
 import hashlib
 import os
+from logging import getLogger
 from pathlib import Path
-from typing import Any
+from pprint import pprint
 
 import numpy as np
 
 from src.utils.typing import DataInfo
-from pprint import pprint
-from logging import getLogger
 
 logger = getLogger(__name__)
 

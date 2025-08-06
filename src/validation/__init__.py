@@ -1,8 +1,8 @@
-from src.utils.typing import DataInfo
 import numpy as np
 from sklearn.model_selection import GroupKFold
-
 from tqdm.auto import tqdm
+
+from src.utils.typing import DataInfo
 
 
 # FIXME: something wrong with this one

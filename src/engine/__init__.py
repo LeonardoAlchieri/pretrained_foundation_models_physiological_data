@@ -9,11 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from imblearn.under_sampling.base import BaseUnderSampler
 from joblib import parallel_backend
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    classification_report,
     make_scorer,
 )
 from sklearn.model_selection import GridSearchCV
