@@ -3,7 +3,7 @@ defaults:
   - model: logistic_regression
   - feature_extractor: handcrafted
   # - feature_extractor: chronos_large
-  - validation_method: tacv
+  - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
@@ -11,14 +11,10 @@ defaults:
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
   - aggregator: none # accepted: mean_chan, mean_time or none
+  - dataset: bihearts
 
+sampling_rate: ${dataset.sampling_rate}
 seed: 42
-
-dataset: usilaughs
-side: right
-label_name: cognitiveload
-device_map: "mps"
-sampling_rate: 4 # Hz
 
 # hydra:
 #   run:
@@ -26,9 +22,11 @@ sampling_rate: 4 # Hz
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}_${label_name}.npz}
+  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_600s.npz}
+  #path_to_data: ${oc.env:DATA_PATH,./data_ready.nosync/${dataset}/data_${side}_${label_name}_600s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
+  label_processor: ${dataset.label_processor}
 
 engine:
   _target_: src.engine.Engine

@@ -1,0 +1,8 @@
+defaults:
+  - label_processor: none
+
+dataset: BiHeartS
+side: left
+label_name: sleep_wake
+device_map: "mps"
+sampling_rate: 4 # Hz
