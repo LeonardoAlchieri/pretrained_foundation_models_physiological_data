@@ -21,6 +21,7 @@ class EDADataset:
         path_to_data: str,
         validation_method: object,
         feature_extractor: object,
+        label_processor: object,
         debug: bool = False,
     ):
         """
@@ -29,11 +30,14 @@ class EDADataset:
         :param path_to_data: Path to the dataset.
         """
         self.path_to_data = path_to_data
+        self.label_processor = label_processor
+        
         self.data = self._load_data(path_to_data)
         self.validation_method = validation_method
         self.extracted_features: bool = False
         self.feature_extractor = feature_extractor
         self.cache_path = self._get_cache_path()
+
         self.debug = debug
 
     def _get_cache_path(self) -> str:
@@ -62,14 +66,13 @@ class EDADataset:
             Path(self.path_to_data).parent / ".cache" / cache_filename
         )
 
-    @staticmethod
-    def _load_data(path: str) -> DataInfo:
+    def _load_data(self, path: str) -> DataInfo:
         """
         Load the USI Laughs dataset.
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-        loaded_data['labels'] = loaded_data['labels'].reshape(-1)
+        loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1))
         loaded_data['groups'] = loaded_data['groups'].reshape(-1)
         return loaded_data
 
