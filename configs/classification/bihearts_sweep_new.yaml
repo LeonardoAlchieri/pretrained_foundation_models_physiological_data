@@ -14,7 +14,7 @@ seed: 42
 hydra:
   mode: MULTIRUN
   sweep:
-    dir: "outputs/${dataset}-${side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
     subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
   sweeper:
     grid_params: 
@@ -28,9 +28,10 @@ hydra:
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset}/data_${side}.npz}
+  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_600s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
+  label_processor: ${dataset.label_processor}
   debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 
 engine:
