@@ -1,8 +1,8 @@
 defaults:
   - label_processor: label_binarizer
 
-dataset: BiHeartS
-side: left
+dataset: HeartS
+side: unknown
 label_name: sleep_wake
 device_map: "mps"
 sampling_rate: 4 # Hz

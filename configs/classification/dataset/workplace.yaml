@@ -1,0 +1,9 @@
+defaults:
+  - label_processor: binarizer
+
+dataset: Workplace
+side: unknown
+label_name: performance
+device_map: "mps"
+threshold: 3
+sampling_rate: 4 # Hz

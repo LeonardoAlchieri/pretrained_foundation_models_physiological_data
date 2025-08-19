@@ -1,32 +1,38 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: handcrafted
-  # - feature_extractor: chronos_large
+  - feature_extractor: timemixer
   - validation_method: tacv
-  - resampling: none
-  # aggregator is the method used to aggregate the features across the channels. 
-  # Some feature extractors can accept the null: it means that the features can be computed
-  # across channels
-  # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
-  # just wrote down "None" in the code
-  - aggregator: none # accepted: mean_chan, mean_time or none
-  - dataset: workplace
+  - aggregator: mean_chan
+  - resampling: group_undersampler
+  - dataset: hearts
+  - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
 
-# hydra:
-#   run:
-#     dir: ./outputs/${dataset}/${side}_${hydra:runtime.choices.model}_${hydra:runtime.choices.feature_extractor}/${hydra:runtime.choices.validation_method}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
+  sweeper:
+    grid_params: 
+      seed: 42
+      validation_method: lopo, tacv
+    # standard grid search
+    list_params:
+      model: random_baseline, logistic_regression
+      aggregator: none, none
+      feature_extractor: handcrafted, handcrafted
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_10s.npz}
-  #path_to_data: ${oc.env:DATA_PATH,./data_ready.nosync/${dataset}/data_${side}_${label_name}_600s.npz}
+  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_600s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
   label_processor: ${dataset.label_processor}
+  debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 
 engine:
   _target_: src.engine.Engine
@@ -36,7 +42,7 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
-  n_jobs: 3
+  n_jobs: 2
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true

@@ -1,0 +1,9 @@
+defaults:
+  - label_processor: binarizer
+
+dataset: SEED2Wild
+side: unknown
+label_name: Bored
+device_map: "mps"
+threshold: 4
+sampling_rate: 4 # Hz

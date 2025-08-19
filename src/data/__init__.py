@@ -72,7 +72,8 @@ class EDADataset:
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-        loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1)).ravel()
+        loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1, 1)).ravel()
+        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1)).ravel()
         loaded_data['groups'] = loaded_data['groups'].reshape(-1)
         return loaded_data
 
