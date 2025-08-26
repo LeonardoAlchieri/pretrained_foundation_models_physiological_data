@@ -5,7 +5,7 @@ defaults:
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: none
-  - dataset: seed2wild
+  - dataset: seed2lab
   - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}

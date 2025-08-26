@@ -4,7 +4,7 @@ defaults:
   - feature_extractor: handcrafted
   # - feature_extractor: chronos_large
   - validation_method: tacv
-  - resampling: none
+  - resampling: group_undersampler
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
   # across channels
@@ -22,7 +22,7 @@ seed: 42
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_600s.npz}
+  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
   #path_to_data: ${oc.env:DATA_PATH,./data_ready.nosync/${dataset}/data_${side}_${label_name}_600s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}

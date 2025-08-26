@@ -1,8 +1,10 @@
 defaults:
-  - label_processor: label_binarizer
+  - label_processor: binarizer
 
 dataset: M2Sleep
-side: unknown
-label_name: sleep_wake
+side: Unknown
+label_name: ${label_name}
 device_map: "mps"
+threshold: 3
+segment_length: 600 # seconds
 sampling_rate: 4 # Hz

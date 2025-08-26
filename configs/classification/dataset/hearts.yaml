@@ -3,6 +3,7 @@ defaults:
 
 dataset: HeartS
 side: unknown
-label_name: sleep_wake
+label_name: ${label_name}
 device_map: "mps"
+segment_length: 600 # seconds
 sampling_rate: 4 # Hz

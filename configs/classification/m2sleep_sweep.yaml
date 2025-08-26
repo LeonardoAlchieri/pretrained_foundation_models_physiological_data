@@ -3,14 +3,14 @@ defaults:
   - model: logistic_regression
   - feature_extractor: timemixer
   - validation_method: tacv
-  - aggregator: mean_chan
+  - aggregator: none
   - resampling: none
-  - dataset: seed2wild
+  - dataset: M2Sleep
   - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
-label_name: Anxious
+label_name: Avg_SleepQuality_label
 
 hydra:
   mode: MULTIRUN
@@ -21,7 +21,7 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-      label_name: Anxious, Bored, Confused, Engaged, Frustrated, Happy
+      label_name: Avg_SleepQuality_label, PSQI
     # standard grid search
     list_params:
       model: random_baseline, logistic_regression

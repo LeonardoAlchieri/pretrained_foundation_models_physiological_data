@@ -4,12 +4,13 @@ defaults:
   - feature_extractor: timemixer
   - validation_method: tacv
   - aggregator: mean_chan
-  - resampling: group_undersampler
+  - resampling: none
   - dataset: workplace
   - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
+label_name: activity
 
 hydra:
   mode: MULTIRUN
@@ -20,15 +21,17 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
+      label_name: activity, engagement, enjoyment, motivation, performance
     # standard grid search
     list_params:
       model: random_baseline, logistic_regression
       aggregator: none, none
       feature_extractor: handcrafted, handcrafted
+      
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_10s.npz}
+  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
   label_processor: ${dataset.label_processor}

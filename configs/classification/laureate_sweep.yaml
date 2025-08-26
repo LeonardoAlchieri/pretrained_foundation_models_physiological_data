@@ -5,12 +5,12 @@ defaults:
   - validation_method: tacv
   - aggregator: mean_chan
   - resampling: none
-  - dataset: seed2wild
+  - dataset: laureate
   - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
-label_name: Anxious
+label_name: lecture_calmness
 
 hydra:
   mode: MULTIRUN
@@ -21,7 +21,7 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-      label_name: Anxious, Bored, Confused, Engaged, Frustrated, Happy
+      label_name: lecture_calmness, lecture_energy, lecture_enthisiasm, lecture_motivation, lecture_peacefulness, lecture_satisfaction, lecture_stress, lecture_tiredness, lecture_understanding, lecture_unhappines, lecture_worriedness
     # standard grid search
     list_params:
       model: random_baseline, logistic_regression
