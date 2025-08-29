@@ -1,4 +1,4 @@
-# Pretrained Foundation Models for Physiological Data Analysis
+# Pretrained Foundation Models for EDA Data
 
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange.svg)](https://pytorch.org)

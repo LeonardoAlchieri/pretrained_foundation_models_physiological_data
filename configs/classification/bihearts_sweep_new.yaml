@@ -7,13 +7,14 @@ defaults:
   - resampling: group_undersampler # none for sleep_quality
   - dataset: bihearts
   - override hydra/sweeper: list  
+  - label_processor: label_binarizer
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
 label_name: sleep_wake
 
 hydra:
-  mode: MULTIRUN
+  mode: RUN
   sweep:
     dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
     subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}"
@@ -21,12 +22,13 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-      label_name: sleep_quality #sleep_quality
     # standard grid search
     list_params:
-      model: random_baseline, logistic_regression
-      aggregator: none, none
-      feature_extractor: handcrafted, handcrafted
+      model: random_baseline, logistic_regression, random_baseline, logistic_regression
+      aggregator: none, none, none, none
+      feature_extractor: handcrafted, handcrafted, handcrafted, handcrafted
+      label_name: sleep_quality, sleep_quality, sleep_wake, sleep_wake
+      label_processor: label_binarizer, label_binarizer, binarizer, binarizer
 
 datamodule:
   _target_: src.data.EDADataset

@@ -1,9 +1,10 @@
-defaults:
-  - label_processor: binarizer
+# defaults:
+#   - label_processor: binarizer
 
 dataset: M2Sleep
 side: Unknown
 label_name: ${label_name}
+label_processor: ${label_processor}
 device_map: "mps"
 threshold: 3
 segment_length: 600 # seconds

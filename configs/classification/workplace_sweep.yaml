@@ -8,6 +8,7 @@ defaults:
   - dataset: workplace
   - override hydra/sweeper: list  
 
+# TODO: to be fixed when the label_name is activity
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
 label_name: activity

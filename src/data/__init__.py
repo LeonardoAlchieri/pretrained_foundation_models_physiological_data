@@ -73,7 +73,7 @@ class EDADataset:
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
 
-        # TODO: make sure this works
+        # TODO: Leonardo try to look into this
         # BINARIZER
         loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1, 1)).ravel().astype(int)
 

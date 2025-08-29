@@ -1,9 +1,10 @@
-defaults:
-  - label_processor: binarizer
+# defaults:
+#   - label_processor: binarizer
 
 dataset: SEED2Wild
 side: unknown
 label_name: ${label_name}
+label_processor: ${label_processor}
 device_map: "mps"
 threshold: 4
 segment_length: 10 # seconds

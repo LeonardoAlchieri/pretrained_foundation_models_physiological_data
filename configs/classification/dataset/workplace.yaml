@@ -1,11 +1,12 @@
-defaults:
-# binarizer for 'engagement', 
-# label_binarizer for 'activity', 
-  - label_processor: binarizer 
+# defaults:
+# # binarizer for 'engagement', 
+# # label_binarizer for 'activity', 
+#   - label_processor: binarizer 
 
 dataset: Workplace
 side: unknown
 label_name: ${label_name}
+label_processor: ${label_processor}
 device_map: "mps"
 threshold: 3
 segment_length: 10 # seconds

@@ -1,9 +1,10 @@
-defaults:
-  - label_processor: label_binarizer # binarizer for sleep_quality
+# defaults:
+#   - label_processor: label_binarizer # binarizer for sleep_quality
 
 dataset: BiHeartS
 side: left
 label_name: ${label_name}
+label_processor: ${label_processor}
 device_map: "mps"
 threshold: 5
 segment_length: 600 # seconds
