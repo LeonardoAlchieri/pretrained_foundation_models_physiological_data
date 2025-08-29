@@ -3,7 +3,7 @@ defaults:
   - model: logistic_regression
   - feature_extractor: handcrafted
   # - feature_extractor: chronos_large
-  - validation_method: tacv
+  - validation_method: lopo
   - resampling: group_undersampler
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed
@@ -11,7 +11,7 @@ defaults:
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
   - aggregator: none # accepted: mean_chan, mean_time or none
-  - dataset: workplace
+  - dataset: hearts
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
@@ -36,7 +36,7 @@ engine:
     _partial_: true
   inner_cv_folds: 3
   resampling: ${resampling}
-  n_jobs: 3
+  n_jobs: 2
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true

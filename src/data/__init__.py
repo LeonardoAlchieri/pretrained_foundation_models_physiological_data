@@ -74,11 +74,14 @@ class EDADataset:
         loaded_data = dict(np.load(path, allow_pickle=True))
 
         # TODO: make sure this works
-        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1, 1)).ravel().astype(int)
-        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1)).ravel()
-        loaded_data['labels'] = loaded_data['labels'].reshape(-1)
+        # BINARIZER
+        loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1, 1)).ravel().astype(int)
 
-        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'])
+        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels']).ravel()
+        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'])
+
+        # LABELBINARIZER
+        # loaded_data['labels'] = loaded_data['labels'].reshape(-1)
         loaded_data['groups'] = loaded_data['groups'].reshape(-1)
         return loaded_data
 

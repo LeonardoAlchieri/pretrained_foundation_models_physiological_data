@@ -21,7 +21,7 @@ hydra:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-      label_name: sleep_wake, SleepQuality
+      label_name: sleep_wake #, SleepQuality
     # standard grid search
     list_params:
       model: random_baseline, logistic_regression

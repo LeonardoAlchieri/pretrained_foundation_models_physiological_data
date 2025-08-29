@@ -16,7 +16,7 @@ hydra:
   mode: MULTIRUN
   sweep:
     dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
-    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}"
   sweeper:
     grid_params: 
       seed: 42

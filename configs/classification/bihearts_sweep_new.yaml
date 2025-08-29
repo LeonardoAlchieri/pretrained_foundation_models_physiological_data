@@ -4,7 +4,7 @@ defaults:
   - feature_extractor: timemixer
   - validation_method: tacv
   - aggregator: mean_chan
-  - resampling: group_undersampler
+  - resampling: group_undersampler # none for sleep_quality
   - dataset: bihearts
   - override hydra/sweeper: list  
 
@@ -16,12 +16,12 @@ hydra:
   mode: MULTIRUN
   sweep:
     dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
-    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}"
   sweeper:
     grid_params: 
       seed: 42
       validation_method: lopo, tacv
-      label_name: sleep_wake, sleep_quality
+      label_name: sleep_quality #sleep_quality
     # standard grid search
     list_params:
       model: random_baseline, logistic_regression

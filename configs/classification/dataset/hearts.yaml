@@ -1,9 +1,10 @@
 defaults:
-  - label_processor: label_binarizer
+  - label_processor: label_binarizer # binarizer for SleepQuality
 
 dataset: HeartS
-side: unknown
-label_name: ${label_name}
+side: Unknown
+label_name: sleep_wake
 device_map: "mps"
+threshold: 3
 segment_length: 600 # seconds
 sampling_rate: 4 # Hz

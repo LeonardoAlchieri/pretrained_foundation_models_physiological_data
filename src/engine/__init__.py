@@ -95,6 +95,7 @@ class Engine:
             model = self.models[fold_idx]
             y_pred = model.predict(X_test)
             acc = self.scoring(y_true=y_test, y_pred=y_pred)
+
             report = compute_metrics(
                 y_test, y_pred, metrics=self.additional_metrics
             )

@@ -5,6 +5,6 @@ dataset: SEED2Wild
 side: unknown
 label_name: ${label_name}
 device_map: "mps"
-threshold: 3
+threshold: 4
 segment_length: 10 # seconds
 sampling_rate: 4 # Hz

@@ -23,6 +23,7 @@ class GroupUnderSampler:
                 sampling_strategy=self.sampling_strategy,
                 replacement=self.replacement,
             )
+            
             X_resampled_group, y_resampled_group = rus.fit_resample(X_group, y_group)
             X_resampled.append(X_resampled_group)
             y_resampled.append(y_resampled_group)
