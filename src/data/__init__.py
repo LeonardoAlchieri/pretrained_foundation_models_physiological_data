@@ -3,7 +3,7 @@ import os
 from logging import getLogger
 from pathlib import Path
 from pprint import pprint
-import sklearn
+from sklearn.base import TransformerMixin
 
 import numpy as np
 
@@ -22,7 +22,7 @@ class EDADataset:
         path_to_data: str,
         validation_method: object,
         feature_extractor: object,
-        label_processor: object,
+        label_processor: TransformerMixin,
         debug: bool = False,
     ):
         """
@@ -32,7 +32,7 @@ class EDADataset:
         """
         self.path_to_data = path_to_data
         self.label_processor = label_processor
-        
+
         self.data = self._load_data(path_to_data)
         self.validation_method = validation_method
         self.extracted_features: bool = False
@@ -46,26 +46,23 @@ class EDADataset:
         Get the cache path based on the data file and feature extractor hash.
         """
         os.makedirs(Path(self.path_to_data).parent / ".cache", exist_ok=True)
-        
+
         # Create a hash of the feature_extractor
         feature_extractor_dict = self.feature_extractor.to_dict()
         print("Feature extractor dict:")
         # Print the feature extractor dict in light blue
         print("\033[94m")  # Light blue ANSI escape code
         pprint(feature_extractor_dict, indent=2, width=80, compact=False)
-        print("\033[0m")   # Reset color
+        print("\033[0m")  # Reset color
 
         feature_extractor_str = str(feature_extractor_dict)
         feature_hash = hashlib.md5(feature_extractor_str.encode()).hexdigest()
         print(f"\033[94mFeature extractor hash: {feature_hash}\033[0m")
-        
-        
+
         # Combine data file stem with feature extractor hash
         cache_filename = f"{str(Path(self.path_to_data).stem)}_{feature_hash}.npy"
-        
-        return str(
-            Path(self.path_to_data).parent / ".cache" / cache_filename
-        )
+
+        return str(Path(self.path_to_data).parent / ".cache" / cache_filename)
 
     def _load_data(self, path: str) -> DataInfo:
         """
@@ -76,17 +73,12 @@ class EDADataset:
 
         # TODO: Leonardo try to look into this. This approach is tentative.
 
-        if self.label_processor.__class__ == sklearn.preprocessing.Binarizer:
-            loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'].reshape(-1, 1)).ravel().astype(int)
-        elif self.label_processor.__class__ == sklearn.preprocessing._label.LabelBinarizer:
-            loaded_data['labels'] = loaded_data['labels'].reshape(-1)
+        loaded_data["labels"] = (
+            self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1))
+            .reshape(-1)
+            .astype(int)
+        )
 
-        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels']).ravel()
-        # loaded_data['labels'] = self.label_processor.fit_transform(loaded_data['labels'])
-
-        # INITIAL APPROACH
-        # loaded_data['labels'] = loaded_data['labels'].reshape(-1)
-        loaded_data['groups'] = loaded_data['groups'].reshape(-1)
         return loaded_data
 
     def _check_and_load_from_cache(self):
@@ -96,7 +88,7 @@ class EDADataset:
                 self.cache_path, allow_pickle=True
             ).item()
             self.extracted_features = True
-            
+
             return True
         else:
             logger.info(f"No cached features found at {self.cache_path}. Computing...")
@@ -117,7 +109,7 @@ class EDADataset:
 
         if not inplace:
             return self
-        
+
     def _reduce_size_for_debugging(self):
         first_iteration = True
         for key in self.data:
@@ -126,7 +118,9 @@ class EDADataset:
                     if first_iteration:
                         original_size = self.data[key].shape[0]
                         reduced_size = min(original_size, 300)
-                        random_indices = np.random.choice(original_size, size=reduced_size, replace=False)
+                        random_indices = np.random.choice(
+                            original_size, size=reduced_size, replace=False
+                        )
                     self.data[key] = self.data[key][random_indices]
         logger.info(
             f"Reduced dataset size for debugging. Original size: {original_size}, Reduced size: {reduced_size}"
