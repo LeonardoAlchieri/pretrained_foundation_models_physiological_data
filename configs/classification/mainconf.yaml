@@ -26,7 +26,7 @@ datamodule:
   #path_to_data: ${oc.env:DATA_PATH,./data_ready.nosync/${dataset}/data_${side}_${label_name}_600s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
-  label_processor: ${dataset.label_processor}
+  label_processor: ${label_processor}
 
 engine:
   _target_: src.engine.Engine

@@ -3,7 +3,7 @@
 
 dataset: BiHeartS
 side: left
-label_name: ${label_name}
+label_name: sleep_wake
 label_processor: ${label_processor}
 device_map: "mps"
 threshold: 5

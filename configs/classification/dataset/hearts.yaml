@@ -2,7 +2,7 @@
 #   - label_processor: label_binarizer # binarizer for SleepQuality
 
 dataset: HeartS
-side: Unknown
+side: unknown
 label_name: sleep_wake
 device_map: "mps"
 label_processor: ${label_processor}

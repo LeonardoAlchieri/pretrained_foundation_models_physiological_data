@@ -8,7 +8,9 @@ defaults:
   - dataset: workplace
   - override hydra/sweeper: list  
 
-# TODO: to be fixed when the label_name is activity
+# NOTE: label 'activity' has been discarded
+# since there are other and better sensor data 
+# that can be used other than EDA.
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
 label_name: activity
