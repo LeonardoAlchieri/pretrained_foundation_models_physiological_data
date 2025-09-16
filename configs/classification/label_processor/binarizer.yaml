@@ -1,2 +1,3 @@
 _target_: sklearn.preprocessing.Binarizer
 threshold: ${dataset.threshold}
+# TODO: extend to remove "neutral" values
