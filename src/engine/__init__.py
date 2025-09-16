@@ -63,6 +63,8 @@ class Engine:
                 total=len(datamodule.train_data_folds),
             ):
                 X_train, y_train = Xy_train["features"], Xy_train["labels"]
+
+                # TODO: hard coded, to add in conf file
                 imputer = SimpleImputer(strategy="mean")
                 X_train = imputer.fit_transform(X_train)
                 self.imputers.append(imputer)

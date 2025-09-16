@@ -70,14 +70,12 @@ class EDADataset:
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
+        # breakpoint()
+        loaded_data["labels"] = (self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1)).reshape(-1).astype(int))
 
-        # TODO: Leonardo try to look into this. This approach is tentative.
-
-        loaded_data["labels"] = (
-            self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1))
-            .reshape(-1)
-            .astype(int)
-        )
+        if loaded_data["labels"].shape[0] != loaded_data["values"].shape[0]:
+            # TODO: add more info to the error (e.g. shapes and label_processor name)
+            raise ValueError(f'Labels shape got messed up when using the label processor. Are you sure you used the correct one?')
 
         return loaded_data
 
@@ -133,6 +131,7 @@ class EDADataset:
             )
         if self.debug:
             self._reduce_size_for_debugging()
+
         self.train_data_folds, self.test_data_folds = self.validation_method(self.data)
 
         if not inplace:

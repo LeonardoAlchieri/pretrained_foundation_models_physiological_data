@@ -17,6 +17,9 @@ class GroupUnderSampler:
             X_group = X[indices]
             y_group = y[indices]
 
+            if self.check_user_one_class(y_group) is True:
+                continue
+
             # Apply random under-sampling to each group
             rus = RandomUnderSampler(
                 random_state=self.random_state,
@@ -30,8 +33,16 @@ class GroupUnderSampler:
 
         # Concatenate the results from all groups
         X_resampled = np.vstack(X_resampled)
+
         y_resampled = np.concatenate(y_resampled)
         return X_resampled, y_resampled
+    
+    # Returns true if group contains one class only.
+    @staticmethod
+    def check_user_one_class(group) -> bool:
+        if np.unique(group).size == 1: 
+            return True
+        return False
 
 
 class NoUnderSampler:
