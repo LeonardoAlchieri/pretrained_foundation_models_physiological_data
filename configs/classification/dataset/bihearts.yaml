@@ -3,9 +3,9 @@
 
 dataset: BiHeartS
 side: left
-label_name: sleep_wake
+label_name: ${label_name}
 label_processor: ${label_processor}
-device_map: "mps"
-threshold: 5
+device_map: "cpu"
+threshold: 5 # TODO: I do not like having this variable here, but for the moment let's keep it
 segment_length: 600 # seconds
 sampling_rate: 4 # Hz

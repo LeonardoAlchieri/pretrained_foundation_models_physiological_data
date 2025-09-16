@@ -6,12 +6,12 @@ defaults:
   - aggregator: none
   - resampling: group_undersampler
   - dataset: bihearts
-  - label_processor: label_binarizer
+  - label_processor: binarizer
   - override hydra/sweeper: list  
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
-label_name: sleep_wake
+label_name: sleep_quality
 
 hydra:
   mode: RUN
@@ -29,11 +29,11 @@ hydra:
       resampling: group_undersampler, group_undersampler, group_undersampler, group_undersampler # none for sleep_quality, TODO NOTE FIXME
       feature_extractor: handcrafted, handcrafted, handcrafted, handcrafted
       label_name: sleep_quality, sleep_quality, sleep_wake, sleep_wake
-      label_processor: label_binarizer, label_binarizer, binarizer, binarizer
+      label_processor: binarizer, binarizer, label_binarizer, label_binarizer
 
 datamodule:
   _target_: src.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,../datasets_cleaning/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
+  path_to_data: ${oc.env:DATA_PATH,/Volumes/Giovanno/Datasets_New_Format/data_ready.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
   label_processor: ${dataset.label_processor}
