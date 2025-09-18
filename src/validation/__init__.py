@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.model_selection import GroupKFold
+from sympy import randMatrix
 from tqdm.auto import tqdm
 
 from src.utils.typing import DataInfo
@@ -7,8 +8,9 @@ from src.utils.typing import DataInfo
 
 # FIXME: something wrong with this one
 class TACV:
-    def __init__(self, num_folds: int):
+    def __init__(self, num_folds: int, random_state: int):
         self.num_folds = num_folds
+        self.random_state = random_state
 
     def __call__(self, data: DataInfo) -> tuple[list[DataInfo], list[DataInfo]]:
         """
@@ -20,7 +22,9 @@ class TACV:
         features = data["features"]
         labels = data["labels"]
         groups = data["groups"]
-        gkf = GroupKFold(n_splits=self.num_folds)
+        gkf = GroupKFold(
+            n_splits=self.num_folds, random_state=self.random_state, shuffle=True
+        )
 
         train_folds = []
         test_folds = []
@@ -102,4 +106,49 @@ class LOPO:
                     "groups": groups[test_idx],
                 }
             )
+        return train_folds, test_folds
+
+
+class LNPO:
+    def __init__(self, num_folds: int, random_state: int):
+        self.num_folds = num_folds
+        self.random_state = random_state
+
+    def __call__(self, data: DataInfo) -> tuple[list[DataInfo], list[DataInfo]]:
+        """
+        Perform a TACV (Time-Aware Cross-Validation) split on the dataset.
+
+        :param data: The dataset to be split.
+        :return: A tuple containing the training and testing datasets for each fold.
+        """
+        features = data["features"]
+        labels = data["labels"]
+        groups = data["groups"]
+        gkf = GroupKFold(
+            n_splits=self.num_folds, random_state=self.random_state, shuffle=True
+        )
+
+        train_folds = []
+        test_folds = []
+
+        for train_indices, test_indices in tqdm(
+            gkf.split(features, labels, groups),
+            desc="TACV Splitting",
+            total=self.num_folds,
+        ):
+            train_folds.append(
+                {
+                    "features": features[train_indices],
+                    "labels": labels[train_indices],
+                    "groups": groups[train_indices],
+                }
+            )
+            test_folds.append(
+                {
+                    "features": features[test_indices],
+                    "labels": labels[test_indices],
+                    "groups": groups[test_indices],
+                }
+            )
+
         return train_folds, test_folds

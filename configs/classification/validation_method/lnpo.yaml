@@ -1,0 +1,3 @@
+_target_: src.validation.LNPO
+num_folds: 5
+random_state: ${seed}
