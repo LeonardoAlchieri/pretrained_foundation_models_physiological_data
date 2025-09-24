@@ -1,6 +1,6 @@
-from numpy import ndarray, stack, nanmean, nanstd, array
+from numpy import ndarray, stack, nanmean, nanstd, array, asarray
 from pandas import Series, DataFrame
-from cvxEDA import cvxEDA
+from neurokit2.eda import eda_process
 from gc import collect as pick_up_trash
 
 from logging import getLogger
@@ -9,6 +9,7 @@ from logging import getLogger
 logger = getLogger("eda")
 
 # See https://github.com/lciti/cvxEDA for more EDA analysis methdos
+
 
 # TODO: probably remove and use some third party library
 def standardize(signal: Series | ndarray | list) -> ndarray:
@@ -49,6 +50,10 @@ def decomposition(
         the method returns a dictionary with the decomposed signals
         (see cvxEDA for more details)
     """
-    
+
     yn = standardize(signal=eda_signal)
-    return cvxEDA(yn, 1.0 / frequency)
+    processed_data: DataFrame = eda_process(eda_signal=yn, sampling_rate=frequency)[0]
+    return {
+        "tonic component": asarray(processed_data["EDA_Tonic"].values),
+        "phasic component": asarray(processed_data["EDA_Phasic"].values),
+    }
