@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - default@_here_: default
+  - sweeps@_here_: basic
+  - override dataset: seed2lab
+  - override label_processor: binarizer
+
+label_name: Anxious # TODO accepted:
+segment_length: 10 # in seconds
+device_map: "cpu" # accepted: "cpu", "cuda", "mps"
+
+label_processor.threshold: 4

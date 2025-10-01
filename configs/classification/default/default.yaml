@@ -1,34 +1,21 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: timemixer
-  - validation_method: lnpo
-  - aggregator: mean_chan
+  - feature_extractor: handcrafted
+  - validation_method: lopo
   - resampling: none
+  # aggregator is the method used to aggregate the features across the channels. 
+  # Some feature extractors can accept the null: it means that the features can be computed
+  # across channels
+  # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
+  # just wrote down "None" in the code
+  - aggregator: none # accepted: mean_chan, mean_time or none
   - dataset: usilaughs
-  - label_processor: none
-
-  - override hydra/sweeper: list  
+  - scaling_method: standard_scaler
+  - label_processor: binarizer
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 42
-label_name: cognitiveload
-device_map: "mps"
-
-hydra:
-  mode: MULTIRUN 
-  sweep:
-    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
-    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}-${seed}"
-  sweeper:
-    grid_params: 
-      seed: 42, 52, 40, 342433, 243, 0, 3455643, 232, 1, 2, 4353, 340, 34503, 234958, 323, 13
-      validation_method: lnpo
-    # standard grid search
-    list_params:
-      model: random_baseline, logistic_regression, logistic_regression, logistic_regression
-      aggregator: none, none, mean_chan, mean_chan
-      feature_extractor: handcrafted, handcrafted, timemixer, chronos_small
 
 datamodule:
   _target_: src.data.EDADataset
@@ -36,6 +23,8 @@ datamodule:
   validation_method: ${validation_method}
   feature_extractor: ${feature_extractor}
   label_processor: ${dataset.label_processor}
+  scaling_method: ${scaling_method}
+  recompute_features: false
   debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 
 engine:

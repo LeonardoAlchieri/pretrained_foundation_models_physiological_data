@@ -1,0 +1,6 @@
+_target_: src.label_processor.inside.InsideLabelProcessor
+lower_lower_threshold: ${dataset.lower_lower_threshold}
+lower_upper_threshold: ${dataset.lower_upper_threshold}
+upper_upper_threshold: ${dataset.upper_upper_threshold}
+upper_lower_threshold: ${dataset.upper_lower_threshold}
+threshold_type: percentile

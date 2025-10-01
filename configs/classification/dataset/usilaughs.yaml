@@ -5,6 +5,6 @@ dataset: usilaughs
 side: right
 label_name: ${label_name}
 label_processor: ${label_processor}
-threshold: 0.5 # TODO: I do not like having this variable here, but for the moment let's keep it
-segment_length: 4 # seconds
+threshold: ${threshold}
+segment_length: ${segment_length} # seconds
 sampling_rate: 4 # Hz

@@ -1,0 +1,4 @@
+_target_: src.label_processor.extreme_only.ExtremeOnlyLabelProcessor
+lower_threshold: ${dataset.lower_threshold}
+upper_threshold: ${dataset.upper_threshold}
+threshold_type: value
