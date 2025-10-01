@@ -24,6 +24,8 @@ class EDADataset:
         validation_method: object,
         feature_extractor: object,
         label_processor: TransformerMixin,
+        scaling_method: TransformerMixin,
+        recompute_features: bool = False,
         debug: bool = False,
     ):
         """
@@ -39,6 +41,9 @@ class EDADataset:
         self.extracted_features: bool = False
         self.feature_extractor = feature_extractor
         self.cache_path = self._get_cache_path()
+        self.recompute_features = recompute_features
+
+        self.scaling_method = scaling_method
 
         self.debug = debug
 
@@ -62,7 +67,7 @@ class EDADataset:
         feature_extractor_str = str(feature_extractor_dict)
         label_processor_str = str(label_processor_dict)
         feature_hash = hashlib.md5(
-            (feature_extractor_str + label_processor_str).encode()
+            (feature_extractor_str + label_processor_str + self.path_to_data).encode()
         ).hexdigest()
         print(f"\033[94mFeature extractor hash: {feature_hash}\033[0m")
 
@@ -92,7 +97,7 @@ class EDADataset:
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-        # breakpoint()
+
         loaded_data["labels"] = (
             self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1))
             .reshape(-1)
@@ -126,9 +131,12 @@ class EDADataset:
         """
         Extract features from the dataset using the provided feature extractor.
         """
-        if not self._check_and_load_from_cache():
+        if not self._check_and_load_from_cache() or self.recompute_features:
             if not self.extracted_features:
                 self.data = self.feature_extractor(self.data)
+                self.data["features"] = self.scaling_method.fit_transform(
+                    self.data["features"]
+                )
                 np.save(
                     self.cache_path,
                     self.data,
