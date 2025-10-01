@@ -133,7 +133,7 @@ class LNPO:
 
         for train_indices, test_indices in tqdm(
             gkf.split(features, labels, groups),
-            desc="TACV Splitting",
+            desc="LNPO Splitting",
             total=self.num_folds,
         ):
             train_folds.append(

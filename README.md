@@ -52,17 +52,17 @@ conda activate pff
 
 1. **Single experiment**:
 ```bash
-python classification.py --config-name=mainconf dataset=usilaughs side=right
+python classification.py --config-name=default dataset=usilaughs
 ```
 
 2. **Hyperparameter sweep**:
 ```bash
-python classification.py --config-name=usilaughs_sweep --multirun
+python classification.py --config-name=usilaughs --multirun
 ```
 
-3. **Custom configuration**:
+3. **Custom configuration with overrides**:
 ```bash
-python classification.py feature_extractor=moment_large model=logistic_regression validation_method=lopo
+python classification.py --config-name=default feature_extractor=moment_large model=logistic_regression validation_method=lopo dataset=seed
 ```
 
 ## 📈 Datasets
@@ -78,10 +78,21 @@ These datasets can be shared, either in raw format or in the pre-processed forma
 
 ### Data Format
 
-Each dataset should be stored as `.npz` files with:
-- `values`: EDA signal data (shape: [samples, time, channels])
-- `labels`: Binary classification labels
-- `groups`: Subject/session identifiers for cross-validation
+Each dataset should be stored as `.npz` files following this naming convention:
+```
+data_{side}_{label_name}_{segment_length}s.npz
+```
+
+Examples:
+- `data_right_engagement_10s.npz`
+- `data_left_enjoyment_5s.npz`
+- `data_unknown_performance_30s.npz`
+
+Each `.npz` file must contain exactly 4 keys with numpy arrays:
+- `values`: EDA signal data (shape: [N, T, A] where N=samples, T=time points, A=channels)
+- `labels`: Classification labels (shape: [N] - one label per sample)
+- `groups`: Subject/session identifiers for cross-validation (shape: [N] - one group ID per sample)
+- `name`: Dataset name (numpy array containing the dataset name as string)
 
 ## 🤖 Supported Models
 
@@ -97,27 +108,61 @@ Each dataset should be stored as `.npz` files with:
 
 ## ⚙️ Configuration
 
-The framework uses Hydra for configuration management. Key configuration components:
+The framework uses Hydra for configuration management with a modular, composable structure. Configuration files are organized as follows:
+
+```
+configs/classification/
+├── default/
+│   └── default.yaml        # Base configuration with all default settings
+├── sweeps/
+│   └── basic.yaml          # Sweep configuration for hyperparameter searches
+├── model/                  # Model configurations
+├── feature_extractor/      # Feature extractor configurations
+├── dataset/               # Dataset-specific configurations
+├── validation_method/     # Cross-validation strategies
+├── aggregator/           # Feature aggregation methods
+├── label_processor/      # Label processing methods
+├── scaling_method/       # Data scaling methods
+├── resampling/           # Resampling strategies
+├── usilaughs.yaml        # Dataset-specific experiment configs
+├── seed.yaml
+├── bihearts.yaml
+├── apsync.yaml
+└── workplace.yaml
+```
+
+### Configuration Composition
+
+Each experiment configuration composes multiple components:
 
 ```yaml
-# Main configuration
-dataset: usilaughs          # Dataset selection
-side: right                 # Data subset
-device_map: "mps"          # Device for model inference
+defaults:
+  - _self_
+  - default@_here_: default      # Import base configuration
+  - sweeps@_here_: basic         # Import sweep configuration (for multirun)
+  - override dataset: usilaughs  # Override dataset selection
+  - override label_processor: binarizer  # Override label processing
 
-# Model configuration
-model: logistic_regression  # Classifier type
-feature_extractor: moment_large  # Foundation model
-validation_method: tacv     # Cross-validation strategy
-aggregator: mean_chan      # Feature aggregation method
+# Experiment-specific parameters
+label_name: engagement
+segment_length: 10
+device_map: "cpu"
+
+# Additional sweep parameters (merged with sweeps/basic.yaml)
+hydra:
+  sweeper:
+    grid_params:
+      label_name: engagement, enjoyment, motivation
 ```
 
 ### Available Configurations
 
-- **Models**: `logistic_regression`, `xgboost`, `dummy_classifier`
+- **Models**: `logistic_regression`, `xgboost`, `dummy_classifier`, `random_baseline`
 - **Feature Extractors**: `moment_large`, `chronos_large`, `chronos_small`, `mantis`, `timemixer`, `handcrafted`
-- **Validation Methods**: `lopo` (Leave-One-Person-Out), `tacv` (Time-Aware Cross-Validation)
+- **Validation Methods**: `lopo` (Leave-One-Person-Out), `tacv` (Time-Aware Cross-Validation), `lnpo` (Leave-N-Persons-Out)
 - **Aggregators**: `mean_chan`, `mean_time`, `concat`, `none`
+- **Label Processors**: `binarizer`, `none`, `extreme_only`, `inside`
+- **Scaling Methods**: `standard_scaler`, `min_max_scaler`, `robust_scaler`, `none`
 
 ## 📋 Experiments
 
@@ -127,16 +172,19 @@ Run comprehensive experiments across all model-dataset combinations:
 
 ```bash
 # USILaughs dataset
-python classification.py --config-name=usilaughs_sweep --multirun
+python classification.py --config-name=usilaughs --multirun
 
 # SEED dataset  
-python classification.py --config-name=seed_sweep --multirun
+python classification.py --config-name=seed --multirun
 
 # BiHeartS dataset
-python classification.py --config-name=bihearts_sweep --multirun
+python classification.py --config-name=bihearts --multirun
 
 # APSYNC dataset
-python classification.py --config-name=apsync_sweep --multirun
+python classification.py --config-name=apsync --multirun
+
+# Workplace dataset
+python classification.py --config-name=workplace --multirun
 ```
 
 ## 📊 Results Analysis
@@ -187,8 +235,42 @@ device_map: ${device_map}
 ### Adding New Datasets
 
 1. Prepare data in the required format (`.npz` file)
-2. Create sweep configuration in `configs/classification/`
-3. Update dataset paths in configuration files
+2. Create dataset configuration in `configs/classification/dataset/`
+3. Create experiment configuration that imports the dataset:
+```yaml
+defaults:
+  - _self_
+  - default@_here_: default
+  - sweeps@_here_: basic
+  - override dataset: your_new_dataset
+  - override label_processor: binarizer
+
+label_name: your_label
+segment_length: 10
+device_map: "cpu"
+```
+
+### Adding New Sweep Configurations
+
+Create custom sweep configurations in `configs/classification/sweeps/`:
+```yaml
+defaults:
+  - _self_
+  - override /hydra/sweeper: list
+
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${label_name}-${seed}"
+  sweeper:
+    grid_params: 
+      seed: 42, 123, 456
+      validation_method: tacv, lopo
+    list_params:
+      model: logistic_regression, xgboost
+      feature_extractor: handcrafted, moment_large
+```
 
 ## 📝 Citation
 

@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  - default
+  - sweeps@_here_: basic
+  - override dataset: usilaughs
+  - override label_processor: none
+
+# NOTE: we define the variable as global, instad of calling `dataset.var`, in order not
+# to have default values in the dataset config file.
+label_name: cognitiveload # accepted: cognitiveload
+dataset.side: right # accepted: right, left
+segment_length: 4 # in seconds
+device_map: "cpu" # accepted: "cpu", "cuda", "mps"
+

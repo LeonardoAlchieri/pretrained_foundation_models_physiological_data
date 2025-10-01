@@ -1,9 +1,7 @@
 # defaults:
-# # binarizer for 'engagement', 
-# # label_binarizer for 'activity', 
-#   - label_processor: binarizer 
+#   - label_processor: label_binarizer # binarizer for sleep_quality
 
-dataset: Workplace
+dataset: seed
 side: unknown
 label_name: ${label_name}
 label_processor: ${label_processor}

@@ -5,7 +5,6 @@ dataset: M2Sleep
 side: Unknown
 label_name: ${label_name}
 label_processor: ${label_processor}
-device_map: "mps"
-threshold: 3
-segment_length: 600 # seconds
+device_map: ${device_map}
+segment_length: ${segment_length} # seconds
 sampling_rate: 4 # Hz

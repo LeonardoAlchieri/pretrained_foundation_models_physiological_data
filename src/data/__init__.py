@@ -3,6 +3,7 @@ import os
 from logging import getLogger
 from pathlib import Path
 from pprint import pprint
+import stat
 from sklearn.base import TransformerMixin
 
 import numpy as np
@@ -23,6 +24,8 @@ class EDADataset:
         validation_method: object,
         feature_extractor: object,
         label_processor: TransformerMixin,
+        scaling_method: TransformerMixin,
+        recompute_features: bool = False,
         debug: bool = False,
     ):
         """
@@ -38,6 +41,9 @@ class EDADataset:
         self.extracted_features: bool = False
         self.feature_extractor = feature_extractor
         self.cache_path = self._get_cache_path()
+        self.recompute_features = recompute_features
+
+        self.scaling_method = scaling_method
 
         self.debug = debug
 
@@ -49,6 +55,9 @@ class EDADataset:
 
         # Create a hash of the feature_extractor
         feature_extractor_dict = self.feature_extractor.to_dict()
+        # TODO: this is ugly, we need to find a way to fix it
+        label_processor_dict = vars(self.label_processor)
+        label_processor_dict["name"] = self.label_processor.__class__.__name__
         print("Feature extractor dict:")
         # Print the feature extractor dict in light blue
         print("\033[94m")  # Light blue ANSI escape code
@@ -56,7 +65,10 @@ class EDADataset:
         print("\033[0m")  # Reset color
 
         feature_extractor_str = str(feature_extractor_dict)
-        feature_hash = hashlib.md5(feature_extractor_str.encode()).hexdigest()
+        label_processor_str = str(label_processor_dict)
+        feature_hash = hashlib.md5(
+            (feature_extractor_str + label_processor_str + self.path_to_data).encode()
+        ).hexdigest()
         print(f"\033[94mFeature extractor hash: {feature_hash}\033[0m")
 
         # Combine data file stem with feature extractor hash
@@ -64,18 +76,41 @@ class EDADataset:
 
         return str(Path(self.path_to_data).parent / ".cache" / cache_filename)
 
+    @staticmethod
+    def remove_masked_labels(data: DataInfo) -> DataInfo:
+        """
+        Remove samples with masked labels from the dataset.
+        """
+        if np.ma.is_masked(data["labels"]):
+            mask = ~data["labels"].mask
+            for key in data:
+                if key == "name":
+                    continue
+                if isinstance(data[key], np.ndarray):
+                    data[key] = np.asarray(data[key][mask])
+            # data["labels"] = data["labels"].data[mask]  # convert to regular ndarray
+        return data
+
     def _load_data(self, path: str) -> DataInfo:
         """
         Load the dataset.
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-        # breakpoint()
-        loaded_data["labels"] = (self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1)).reshape(-1).astype(int))
+
+        loaded_data["labels"] = (
+            self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1))
+            .reshape(-1)
+            .astype(int)
+        )
+        loaded_data = self.remove_masked_labels(loaded_data)
 
         if loaded_data["labels"].shape[0] != loaded_data["values"].shape[0]:
             # TODO: add more info to the error (e.g. shapes and label_processor name)
-            raise ValueError(f'Labels shape got messed up when using the label processor. Are you sure you used the correct one?')
+            raise ValueError(
+                f"""Labels shape got messed up when using the label processor. Are you sure you used the correct one?\n
+                Received labels shape: {loaded_data["labels"].shape}, values shape: {loaded_data["values"].shape}, label processor: {self.label_processor.__class__.__name__}"""
+            )
 
         return loaded_data
 
@@ -96,9 +131,12 @@ class EDADataset:
         """
         Extract features from the dataset using the provided feature extractor.
         """
-        if not self._check_and_load_from_cache():
+        if not self._check_and_load_from_cache() or self.recompute_features:
             if not self.extracted_features:
                 self.data = self.feature_extractor(self.data)
+                self.data["features"] = self.scaling_method.fit_transform(
+                    self.data["features"]
+                )
                 np.save(
                     self.cache_path,
                     self.data,

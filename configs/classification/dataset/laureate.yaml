@@ -4,8 +4,7 @@
 dataset: LAUREATE
 side: Unknown
 label_name: ${label_name}
-device_map: "mps"
+device_map: ${device_map}
 label_processor: ${label_processor}
-threshold: 3
-segment_length: 10 # seconds
+segment_length: ${segment_length} # seconds
 sampling_rate: 4 # Hz

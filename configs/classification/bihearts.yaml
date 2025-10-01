@@ -1,0 +1,19 @@
+defaults:
+  - _self_
+  - default
+  - sweeps@_here_: basic
+  - override dataset: hearts
+  - override label_processor: binarizer
+
+label_name: sleep_wake # accepted: sleep_wake, sleep_quality
+dataset.side: left # accepted: left, right
+segment_length: 600
+device_map: "cpu"
+
+label_processor.threshold: 5 # TODO: check if correct
+
+# TODO: test if this is working!
+hydra:
+  sweeper:
+    grid_params:
+      label_name: sleep_wake, sleep_quality

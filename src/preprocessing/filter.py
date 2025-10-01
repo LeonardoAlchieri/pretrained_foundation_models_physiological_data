@@ -1,6 +1,5 @@
 # NOTE: this file contains some scripts useful for cleaning, filter and
 # similar time serie biometrics data
-from distutils.log import warn
 from logging import getLogger
 from typing import Callable
 from numpy import amax, nan, ndarray, pad, stack
@@ -48,7 +47,7 @@ def apply_filtering(
     # NOTE: essential, otherwise the filter will be empty
     data_clean = data.dropna()
     if len(data_clean) == 0:
-        warn("The current user does not have an EDA signal. Returning all NaNs")
+        UserWarning("The current user does not have an EDA signal. Returning all NaNs")
         y = data.values
         idx: Index = data.index.get_level_values(1)
         cols: list[str] = [f"{data.name[-1]}_{col_appendix}"]
@@ -117,9 +116,7 @@ def butter_lowpass_filter_lfilter(
     return y
 
 
-def moving_avg_acc(
-    data: ndarray | DataFrame, window_size: int
-) -> ndarray:
+def moving_avg_acc(data: ndarray | DataFrame, window_size: int) -> ndarray:
     """Simple method to evaluate the moving average, as performed by Empatica, over the
     ACC signal. Keep in mind that this is mot trully a real moving average, but slightly
     differnet.
@@ -160,7 +157,7 @@ def moving_avg_acc(
     Indeed, the arrays :math:`x_t`, :math:`y_t` and :math:`z_t` are of length :math:`M`.
     """
     if isinstance(data, DataFrame):
-        # warn(f'acc_data is a DataFrame. Converting to ndarray.')
+        # UserWarning(f'acc_data is a DataFrame. Converting to ndarray.')
         data: ndarray = data.dropna(how="all")
         acc_data: ndarray = data.values
     elif isinstance(data, ndarray):

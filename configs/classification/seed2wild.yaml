@@ -1,0 +1,14 @@
+defaults:
+  - _self_
+  - default
+  - sweeps@_here_: basic
+  - override dataset: seed2wild
+  - override label_processor: binarizer
+
+# NOTE: we define the variable as global, instad of calling `dataset.var`, in order not
+# to have default values in the dataset config file.
+label_name: Anxious # TODO accepted:
+segment_length: 10 # in seconds
+device_map: "cpu" # accepted: "cpu", "cuda", "mps"
+
+label_processor.threshold: 4
