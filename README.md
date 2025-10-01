@@ -78,10 +78,21 @@ These datasets can be shared, either in raw format or in the pre-processed forma
 
 ### Data Format
 
-Each dataset should be stored as `.npz` files with:
-- `values`: EDA signal data (shape: [samples, time, channels])
-- `labels`: Binary classification labels
-- `groups`: Subject/session identifiers for cross-validation
+Each dataset should be stored as `.npz` files following this naming convention:
+```
+data_{side}_{label_name}_{segment_length}s.npz
+```
+
+Examples:
+- `data_right_engagement_10s.npz`
+- `data_left_enjoyment_5s.npz`
+- `data_unknown_performance_30s.npz`
+
+Each `.npz` file must contain exactly 4 keys with numpy arrays:
+- `values`: EDA signal data (shape: [N, T, A] where N=samples, T=time points, A=channels)
+- `labels`: Classification labels (shape: [N] - one label per sample)
+- `groups`: Subject/session identifiers for cross-validation (shape: [N] - one group ID per sample)
+- `name`: Dataset name (numpy array containing the dataset name as string)
 
 ## 🤖 Supported Models
 
