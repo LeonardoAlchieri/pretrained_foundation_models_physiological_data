@@ -1,12 +1,14 @@
 defaults:
-  - _self_
   - default
-  - sweeps@_here_: basic
+  - sweeps@_here_: none
   - override dataset: seed
   - override label_processor: binarizer
+  - _self_
 
 label_name: engagement
 segment_length: 600
 device_map: "cpu"
 
-label_processor.threshold: 3.4999
+# FIXME: this does not work! it's not setting the parameter!
+label_processor:
+  threshold: 3.4999

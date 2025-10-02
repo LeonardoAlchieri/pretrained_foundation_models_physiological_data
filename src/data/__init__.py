@@ -132,16 +132,16 @@ class EDADataset:
         Extract features from the dataset using the provided feature extractor.
         """
         if not self._check_and_load_from_cache() or self.recompute_features:
-            if not self.extracted_features:
-                self.data = self.feature_extractor(self.data)
-                self.data["features"] = self.scaling_method.fit_transform(
-                    self.data["features"]
-                )
-                np.save(
-                    self.cache_path,
-                    self.data,
-                )
-                self.extracted_features = True
+
+            self.data = self.feature_extractor(self.data)
+            self.data["features"] = self.scaling_method.fit_transform(
+                self.data["features"]
+            )
+            np.save(
+                self.cache_path,
+                self.data,
+            )
+            self.extracted_features = True
 
         if not inplace:
             return self

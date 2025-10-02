@@ -1,9 +1,9 @@
 defaults:
-  - _self_
   - default
   - sweeps@_here_: basic
   - override dataset: workplace
   - override label_processor: none
+  - _self_
 
 # NOTE: we define the variable as global, instad of calling `dataset.var`, in order not
 # to have default values in the dataset config file.

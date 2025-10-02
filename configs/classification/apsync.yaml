@@ -1,12 +1,13 @@
 defaults:
-  - _self_
   - default
   - sweeps@_here_: basic
   - override dataset: apsync
   - override label_processor: binarizer
+  - _self_
 
 label_name: engagement # TODO: accepted: engagement
 segment_length: 600
 device_map: "cpu"
 
-label_processor.threshold: 3.4999 # TODO: check if correct
+label_processor:
+  threshold: 3.4999 # TODO: check if correct

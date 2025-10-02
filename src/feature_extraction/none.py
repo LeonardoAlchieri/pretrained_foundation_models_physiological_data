@@ -8,12 +8,23 @@ from src.utils.typing import DataInfo
 
 logger = getLogger(__name__)
 
+
 class NoneFeatureExtractor:
     """
     A class to extract handcrafted features from EDA signals.
     """
-    
-        
+
+    def __init__(self, channel: int | None = None):
+        """
+        Initializes the NoneFeatureExtractor.
+
+        Parameters
+        ----------
+        channel : int | None, optional
+            The channel to extract features from. If None, all channels are used.
+        """
+        self.channel = channel
+
     def to_dict(self):
         """
         Returns a dictionary representation of the class.
@@ -40,6 +51,8 @@ class NoneFeatureExtractor:
         logger.info("Extracting handcrafted features from EDA signals.")
         features = data["values"]
         features = masked_invalid(features, copy=False)
+        if self.channel is not None:
+            features = features[..., self.channel]
         data["features"] = features.reshape(features.shape[0], -1)
         data["feature_names"] = None
         return data

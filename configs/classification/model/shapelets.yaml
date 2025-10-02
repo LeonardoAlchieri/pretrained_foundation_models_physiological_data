@@ -1,0 +1,7 @@
+model: 
+    _target_: tslearn.shapelets.LearningShapelets
+param_grid:
+  # weight_regularizer: [0, 0.1]
+  # shapelet_length: [0.5] # proportion of the time series length
+  # total_lengths: [3] # number of shapelets per class
+  max_iter: [100]
