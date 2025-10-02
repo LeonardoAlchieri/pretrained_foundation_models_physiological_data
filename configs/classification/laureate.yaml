@@ -1,15 +1,16 @@
 defaults:
-  - _self_
   - default
   - sweeps@_here_: basic
   - override dataset: laureate
   - override label_processor: binarizer
+  - _self_
 
 label_name: lecture_calmness # accepted: lecture_calmness, lecture_energy, lecture_enthisiasm, lecture_motivation, lecture_peacefulness, lecture_satisfaction, lecture_stress, lecture_tiredness, lecture_understanding, lecture_unhappines, lecture_worriedness
 segment_length: 10
 device_map: "cpu"
 
-label_processor.threshold: 3 # TODO: check if correct
+label_processor:
+  threshold: 3 # TODO: check if correct
 
 # TODO: test if this is working!
 hydra:

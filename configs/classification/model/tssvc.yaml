@@ -1,5 +1,5 @@
 model: 
     _target_: tslearn.svm.TimeSeriesSVC
 param_grid:
-  C: [0.01, 0.1, 1, 10]
+  C: [0.1, 1, 10]
   kernel: ["gak"]

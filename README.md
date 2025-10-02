@@ -138,7 +138,7 @@ Each experiment configuration composes multiple components:
 ```yaml
 defaults:
   - _self_
-  - default@_here_: default      # Import base configuration
+  - default      # Import base configuration
   - sweeps@_here_: basic         # Import sweep configuration (for multirun)
   - override dataset: usilaughs  # Override dataset selection
   - override label_processor: binarizer  # Override label processing
@@ -240,7 +240,7 @@ device_map: ${device_map}
 ```yaml
 defaults:
   - _self_
-  - default@_here_: default
+  - default
   - sweeps@_here_: basic
   - override dataset: your_new_dataset
   - override label_processor: binarizer
