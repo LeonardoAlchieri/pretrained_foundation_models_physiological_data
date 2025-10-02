@@ -115,7 +115,8 @@ class EDADataset:
         return loaded_data
 
     def _check_and_load_from_cache(self):
-        if (Path(self.cache_path).exists()) and (not self.extracted_features):
+
+        if (Path(self.cache_path).exists()) and (not self.recompute_features):
             logger.info(f"Loading cached features from {self.cache_path}")
             self.data: dict[str, np.ndarray] = np.load(
                 self.cache_path, allow_pickle=True
@@ -131,7 +132,7 @@ class EDADataset:
         """
         Extract features from the dataset using the provided feature extractor.
         """
-        if not self._check_and_load_from_cache() or self.recompute_features:
+        if not self._check_and_load_from_cache():
 
             self.data = self.feature_extractor(self.data)
             self.data["features"] = self.scaling_method.fit_transform(
