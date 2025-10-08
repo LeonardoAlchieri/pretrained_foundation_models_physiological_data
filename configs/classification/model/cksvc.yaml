@@ -1,0 +1,6 @@
+model: 
+    _target_: src.model.customKernelSVC.CustomKernelSVC
+    C: 1.0
+    trainable_feature_extractor: ${trainable_feature_extractor}
+param_grid:
+  gamma_mult: [1.0, 0.1, 2.0]

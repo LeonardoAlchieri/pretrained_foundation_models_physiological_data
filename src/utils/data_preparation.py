@@ -96,9 +96,45 @@ def decompose_signal(data: pd.DataFrame) -> pd.DataFrame | None:
     try:
         decomposed = decomposition(data["EDA"].values)
     except:
-        UserWarning(
-            f"Decomposition failed. Returning None")
+        UserWarning(f"Decomposition failed. Returning None")
         return None
     data["Tonic"] = decomposed["tonic component"]
     data["Phasic"] = decomposed["phasic component"]
     return data
+
+
+def prepare_data_for_sktime(data: np.ndarray) -> pd.DataFrame:
+    """
+    Prepares the EDA data for use with sktime by converting it into a DataFrame
+    where each cell contains a pd.Series of the time series data for that sample.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        The input EDA data of shape (n_samples, n_timesteps, n_channels).
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame suitable for sktime, with each cell containing a pd.Series.
+    """
+
+    if data.ndim == 2:
+        # FIXME: hardecoded! This needs to be changed
+        data = data.reshape(data.shape[0], -1, 3)
+    if data.ndim != 3:
+        raise ValueError(
+            "Input data must be a 3D array of shape (n_samples, n_timesteps, n_channels)."
+        )
+
+    n_samples, n_timesteps, n_channels = data.shape
+    sktime_data = pd.DataFrame()
+
+    for channel in range(n_channels):
+        channel_series = []
+        for sample in range(n_samples):
+            series = pd.Series(data[sample, :, channel])
+            channel_series.append(series)
+        sktime_data[f"dim_{channel}"] = channel_series
+
+    return sktime_data

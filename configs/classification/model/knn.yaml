@@ -1,0 +1,9 @@
+model: 
+    _target_: src.model.neighbors.TrainableFeatureKNN
+    n_neighbors: 1
+    trainable_feature_extractor: ${trainable_feature_extractor}
+param_grid:
+  weights: ["uniform", "distance"]
+  algorithm: ["auto"]
+  leaf_size: [10, 20, 30]
+  p: [1, 2]
