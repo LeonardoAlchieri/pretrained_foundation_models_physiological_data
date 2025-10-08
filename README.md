@@ -9,16 +9,18 @@ This repository contains the official implementation of research comparing pretr
 
 ## 🔬 Abstract
 
-Recent advances in foundation models have demonstrated remarkable capabilities in natural language processing and computer vision. This work investigates their effectiveness in physiological signal analysis, specifically focusing on electrodermal activity (EDA) classification tasks. We evaluate multiple pretrained foundation models across four diverse datasets (USILaughs, SEED, BiHeartS, APSYNC) and compare their performance against traditional handcrafted features and machine learning approaches.
+Recent advances in foundation models have demonstrated remarkable capabilities in natural language processing and computer vision. This work investigates their effectiveness in physiological signal analysis, specifically focusing on electrodermal activity (EDA) classification tasks. We evaluate multiple pretrained foundation models across four diverse datasets (USILaughs, SEED, BiHeartS, APSYNC) and compare their performance against traditional handcrafted features, trainable feature extractors (e.g., MiniRocket), and machine learning approaches.
 
 ## 📊 Key Features
 
 - **Multi-model evaluation**: Comparison of MOMENT, Chronos, PatchTSMixer, Mantis, and handcrafted features
+- **Trainable feature extractors**: Support for self-supervised feature learning methods like MiniRocket
 - **Comprehensive datasets**: Four diverse EDA datasets for robust evaluation
-- **Feature extraction pipeline**: Unified framework for extracting embeddings from foundation models
+- **Feature extraction pipeline**: Unified framework for both fixed and trainable feature extractors
 - **Cross-validation**: Support for Leave-One-Person-Out (LOPO) and Time-Aware Cross-Validation (TACV)
-- **Modular design**: Easy extension for new models and datasets
+- **Modular design**: Easy extension for new models, datasets, and feature extractors
 - **Reproducible experiments**: Hydra configuration management for systematic experiments
+- **Fair evaluation**: Trainable extractors are fitted per-fold to prevent data leakage
 
 ## 🏗️ Architecture
 
@@ -32,7 +34,12 @@ src/
 │   ├── moment.py      # MOMENT models
 │   ├── mantis.py      # Mantis models
 │   ├── timemixer.py   # PatchTSMixer models
-│   └── handcrafted.py # Traditional handcrafted features
+│   ├── handcrafted.py # Traditional handcrafted features
+│   └── none.py        # Pass-through for raw data
+├── model/             # Model implementations
+│   ├── customKernelSVC.py           # Custom kernel SVC classifier
+│   └── trainable_feature_extraction/ # Trainable feature extractors
+│       └── minirocket.py            # MiniRocket implementation
 ├── engine/            # Training and evaluation engine
 ├── validation/        # Cross-validation strategies
 └── utils/             # Utility functions and configurations
@@ -96,15 +103,27 @@ Each `.npz` file must contain exactly 4 keys with numpy arrays:
 
 ## 🤖 Supported Models
 
-### Foundation Models
+### Foundation Models (Fixed Feature Extractors)
 - **MOMENT** (`AutonLab/MOMENT-1-large`): Time series foundation model
 - **Chronos** (`amazon/chronos-t5-large/small`): Amazon's time series forecasting model
 - **PatchTSMixer** (`ibm-granite/granite-timeseries-patchtsmixer`): IBM's patch-based model
 - **Mantis** (`paris-noah/Mantis-8M`): Multi-modal foundation model
 
+### Trainable Feature Extractors
+In addition to fixed pretrained models, the framework supports **trainable feature extractors** that learn representations in a self-supervised fashion during training:
+
+- **MiniRocket**: Mini Random Convolutional Kernel Transform for time series classification
+- Custom extractors can be easily added by implementing `fit` and `transform` methods
+
+These extractors are trained independently for each fold during cross-validation, enabling fair comparison with fixed foundation models.
+
 ### Baseline Models
 - **Handcrafted Features**: Traditional signal processing features (min, max, mean, std, slopes, peaks, spectral features)
-- **Machine Learning**: Logistic Regression, XGBoost with hyperparameter optimization
+- **Machine Learning Classifiers**: 
+  - Logistic Regression
+  - XGBoost
+  - K-Nearest Neighbors (KNN)
+  - Custom Kernel SVC with RBF kernel and adaptive gamma
 
 ## ⚙️ Configuration
 
@@ -116,8 +135,16 @@ configs/classification/
 │   └── default.yaml        # Base configuration with all default settings
 ├── sweeps/
 │   └── basic.yaml          # Sweep configuration for hyperparameter searches
+│   └── giofeatures.yaml    # Advanced sweep with trainable feature extractors
 ├── model/                  # Model configurations
-├── feature_extractor/      # Feature extractor configurations
+│   ├── logistic_regression.yaml
+│   ├── xgboost.yaml
+│   ├── knn.yaml           # K-Nearest Neighbors
+│   └── cksvc.yaml         # Custom Kernel SVC
+├── feature_extractor/      # Feature extractor configurations (fixed)
+├── trainable_feature_extractor/  # Trainable feature extractor configs
+│   ├── minirocket.yaml    # MiniRocket configuration
+│   └── none.yaml          # No trainable extractor
 ├── dataset/               # Dataset-specific configurations
 ├── validation_method/     # Cross-validation strategies
 ├── aggregator/           # Feature aggregation methods
@@ -157,12 +184,31 @@ hydra:
 
 ### Available Configurations
 
-- **Models**: `logistic_regression`, `xgboost`, `dummy_classifier`, `random_baseline`
-- **Feature Extractors**: `moment_large`, `chronos_large`, `chronos_small`, `mantis`, `timemixer`, `handcrafted`
+- **Models**: `logistic_regression`, `xgboost`, `knn`, `cksvc`, `random_baseline`
+- **Feature Extractors** (Fixed): `moment_large`, `chronos_large`, `chronos_small`, `mantis`, `timemixer`, `handcrafted`, `none`
+- **Trainable Feature Extractors**: `minirocket`, `none`
 - **Validation Methods**: `lopo` (Leave-One-Person-Out), `tacv` (Time-Aware Cross-Validation), `lnpo` (Leave-N-Persons-Out)
 - **Aggregators**: `mean_chan`, `mean_time`, `concat`, `none`
 - **Label Processors**: `binarizer`, `none`, `extreme_only`, `inside`
 - **Scaling Methods**: `standard_scaler`, `min_max_scaler`, `robust_scaler`, `none`
+
+### Trainable vs Fixed Feature Extraction
+
+The framework distinguishes between two types of feature extraction:
+
+1. **Fixed Feature Extractors** (`feature_extractor`): Pretrained foundation models or handcrafted features that don't require training. These are applied identically to all folds.
+
+2. **Trainable Feature Extractors** (`trainable_feature_extractor`): Self-supervised methods that learn representations from the training data. These are:
+   - Fitted independently on each fold's training set
+   - Used to transform both training and test data for that fold
+   - Ensuring fair cross-validation without data leakage
+
+Example configuration combining both:
+```yaml
+feature_extractor: none              # No fixed features
+trainable_feature_extractor: minirocket  # Use MiniRocket (trained per fold)
+model: cksvc                         # Custom kernel SVC classifier
+```
 
 ## 📋 Experiments
 
@@ -268,8 +314,38 @@ hydra:
       seed: 42, 123, 456
       validation_method: tacv, lopo
     list_params:
-      model: logistic_regression, xgboost
-      feature_extractor: handcrafted, moment_large
+      model: logistic_regression, xgboost, knn
+      feature_extractor: handcrafted, timemixer, none
+      trainable_feature_extractor: none, none, minirocket
+```
+
+### Adding Trainable Feature Extractors
+
+1. Create a new trainable feature extractor in `src/model/trainable_feature_extraction/`:
+```python
+class NewTrainableExtractor:
+    def __init__(self, random_state: int):
+        self.random_state = random_state
+    
+    def fit(self, X: np.ndarray) -> "NewTrainableExtractor":
+        # Train on the data (self-supervised)
+        self.model_ = self._train_model(X)
+        return self
+    
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        # Extract features using trained model
+        return self.model_.extract_features(X)
+```
+
+2. Add configuration in `configs/classification/trainable_feature_extractor/`:
+```yaml
+_target_: src.model.trainable_feature_extraction.new_extractor.NewTrainableExtractor
+random_state: ${seed}
+```
+
+3. Use in experiments:
+```bash
+python classification.py feature_extractor=none trainable_feature_extractor=new_extractor model=knn
 ```
 
 ## 📝 Citation
