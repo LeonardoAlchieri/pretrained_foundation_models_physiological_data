@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: basic
+  - sweeps@_here_: giofeatures
   - override dataset: usilaughs
   - override label_processor: none
   - _self_

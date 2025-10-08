@@ -52,11 +52,14 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         self.random_state = random_state
         self.verbose = verbose
 
+        self.X_train = None
+
     def fit(
         self, X: np.ndarray, y: np.ndarray, sample_weight: Optional[np.ndarray] = None
     ):
         X_checked, y_checked = check_X_y(X, y, accept_sparse=False, ensure_2d=True)
-        gram_matrix = self.compute_Ktrtr(X_checked)
+        gram_matrix = self.compute_K_train_train(X_checked)
+        self.X_train = X_checked
 
         self._svc = SVC(
             C=self.C,
@@ -83,9 +86,10 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+
         check_is_fitted(self, attributes=["_svc", "_X_fit_", "_y_fit_"])
         X_checked = check_array(X, accept_sparse=False, ensure_2d=True)
-        gram_matrix = self.compute_Ktrtr(X_checked)
+        gram_matrix = self.compute_K_test_train(X_checked)
         return self._svc.predict(gram_matrix)
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -96,17 +100,36 @@ class CustomKernelSVC(BaseEstimator, ClassifierMixin):
             )
 
         X_checked = check_array(X, accept_sparse=False, ensure_2d=True)
-        gram_matrix = self.compute_Ktrtr(X_checked)
+        gram_matrix = self.compute_K_train_train(X_checked)
         return self._svc.predict_proba(gram_matrix)
 
-    def compute_Ktrtr(
+    def compute_K_train_train(
         self,
-        X: np.ndarray,
+        X_train: np.ndarray,
     ) -> np.ndarray:
         # pairwise distance
-        pdistance_trtr = squareform(pdist(X, metric="euclidean"))
+        pdistance_trtr = squareform(pdist(X_train, metric="euclidean"))
         # RBF gamma median estimator
         RBF_gamma = self.gamma_mult * np.median(pdistance_trtr)
         # Kernel
         Ktrtr = np.exp(-((pdistance_trtr) ** 2) / (2 * RBF_gamma**2))
         return Ktrtr
+
+    def compute_K_test_train(
+        self,
+        X_test: np.ndarray,
+    ) -> np.ndarray:
+
+        if self.X_train is None:
+            raise ValueError(
+                "Train gram matrix is not set. Please fit the model first, or check that the matrix is saved correctly."
+            )
+
+        pdistance_trtr = squareform(pdist(self.X_train, metric="euclidean"))
+        # RBF gamma median estimator
+        RBF_gamma = self.gamma_mult * np.median(pdistance_trtr)
+        # pairwise distance
+        pdistance_tetr = cdist(X_test, self.X_train, metric="euclidean")
+        # Kernel
+        Ktetr = np.exp(-((pdistance_tetr) ** 2) / (2 * RBF_gamma**2))
+        return Ktetr

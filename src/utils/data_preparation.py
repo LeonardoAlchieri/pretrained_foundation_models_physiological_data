@@ -119,9 +119,6 @@ def prepare_data_for_sktime(data: np.ndarray) -> pd.DataFrame:
         A DataFrame suitable for sktime, with each cell containing a pd.Series.
     """
 
-    if data.ndim == 2:
-        # FIXME: hardecoded! This needs to be changed
-        data = data.reshape(data.shape[0], -1, 3)
     if data.ndim != 3:
         raise ValueError(
             "Input data must be a 3D array of shape (n_samples, n_timesteps, n_channels)."

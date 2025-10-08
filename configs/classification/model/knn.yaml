@@ -1,9 +1,8 @@
 model: 
-    _target_: src.model.neighbors.TrainableFeatureKNN
-    n_neighbors: 1
-    trainable_feature_extractor: ${trainable_feature_extractor}
+  _target_: sklearn.neighbors.KNeighborsClassifier
 param_grid:
   weights: ["uniform", "distance"]
+  n_neighbors: [1, 3, 5, 7]
   algorithm: ["auto"]
   leaf_size: [10, 20, 30]
   p: [1, 2]

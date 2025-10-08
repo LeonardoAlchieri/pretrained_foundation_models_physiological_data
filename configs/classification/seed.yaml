@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: none
+  - sweeps@_here_: basic
   - override dataset: seed
   - override label_processor: binarizer
   - _self_
