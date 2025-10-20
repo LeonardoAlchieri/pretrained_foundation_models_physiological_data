@@ -1,0 +1,2 @@
+_target_: src.model.trainable_feature_extraction.minirocket.MiniRocket
+random_state: ${seed}

@@ -1,0 +1,43 @@
+defaults:
+  - _self_
+  - override /hydra/sweeper: list
+
+
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}-${seed}"
+  sweeper:
+    grid_params: 
+      seed: 42, 3245, 435324, 123, 213
+      validation_method: tacv, lnpo
+    list_params:
+      model: 
+        - random_baseline
+        - logistic_regression
+        - logistic_regression
+        - logistic_regression
+        - knn
+        - cksvc
+      aggregator: 
+        - none
+        - none
+        - mean_chan
+        - none
+        - none
+        - none
+      feature_extractor: 
+        - handcrafted
+        - handcrafted
+        - timemixer
+        - none
+        - none
+        - none
+      trainable_feature_extractor: 
+        - none
+        - none
+        - none
+        - minirocket
+        - minirocket
+        - minirocket

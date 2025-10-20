@@ -1,2 +1,3 @@
 _target_: src.feature_extraction.none.NoneFeatureExtractor
 channel: null
+preserve_shape: true

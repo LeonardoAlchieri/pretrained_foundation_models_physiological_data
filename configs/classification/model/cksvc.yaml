@@ -1,0 +1,6 @@
+model: 
+    _target_: src.model.customKernelSVC.CustomKernelSVC
+param_grid:
+  gamma_mult: [0.1, 0.5, 1.0, 2.0, 5.0]
+  C: [0.001, 0.1, 1.0, 10.0, 100.0, 1000.0]
+

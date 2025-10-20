@@ -14,7 +14,7 @@ class NoneFeatureExtractor:
     A class to extract handcrafted features from EDA signals.
     """
 
-    def __init__(self, channel: int | None = None):
+    def __init__(self, channel: int | None = None, preserve_shape: bool = False):
         """
         Initializes the NoneFeatureExtractor.
 
@@ -24,6 +24,7 @@ class NoneFeatureExtractor:
             The channel to extract features from. If None, all channels are used.
         """
         self.channel = channel
+        self.preserve_shape = preserve_shape
 
     def to_dict(self):
         """
@@ -33,7 +34,7 @@ class NoneFeatureExtractor:
             "name": self.__class__.__name__,
         }
 
-    def __call__(self, data: DataInfo) -> EDADataset:
+    def __call__(self, data: DataInfo) -> DataInfo:
         """
         Extracts features from the EDA dataset.
 
@@ -53,6 +54,8 @@ class NoneFeatureExtractor:
         features = masked_invalid(features, copy=False)
         if self.channel is not None:
             features = features[..., self.channel]
-        data["features"] = features.reshape(features.shape[0], -1)
+        if not self.preserve_shape:
+            features = features.reshape(features.shape[0], -1)
+        data["features"] = features
         data["feature_names"] = None
         return data
