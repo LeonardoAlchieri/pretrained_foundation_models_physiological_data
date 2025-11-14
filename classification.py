@@ -5,10 +5,12 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from pytorch_lightning import seed_everything
+
 # set seeds for sklearn
 from sklearn.utils import check_random_state
 from logging import getLogger
 from pprint import pprint
+import time
 
 logger = getLogger(__name__)
 # import wandb
@@ -31,26 +33,25 @@ logger = getLogger(__name__)
 #         return False
 #     return True
 
+
 @hydra.main(
-    config_path="./configs/classification", 
-    # config_name="config",
-    version_base="1.3"
+    config_path="./configs/classification", config_name="usilaughs", version_base="1.3"
 )
 def main(cfg: DictConfig):
-    # run = wandb.init(project="pretrained_foundation_models_physiological_data", 
+    # run = wandb.init(project="pretrained_foundation_models_physiological_data",
     #                  config=OmegaConf.to_container(cfg, resolve=True))
-    
+
     logger.info("Starting classification experiment...")
     # Print the config in red color
     print("\033[91m")
     pprint(OmegaConf.to_container(cfg), indent=2, width=80, compact=False)
     print("\033[0m")
     logger.info(f"{OmegaConf.to_yaml(cfg)}")
-    
-    seed_everything(cfg['seed'], workers=True)
-    check_random_state(cfg['seed'])
+
+    seed_everything(cfg["seed"], workers=True)
+    check_random_state(cfg["seed"])
     # cfg = clean_config(cfg) # to clean the configs, e.g. for None values
-    
+
     logger.info(f"Seed set to: {cfg['seed']}")
 
     # if not check_conf_validity(cfg):
@@ -61,7 +62,7 @@ def main(cfg: DictConfig):
     datamodule = instantiate(cfg.datamodule)
     # cfg = update_config_from_data(datamodule, cfg) # you do this if you need information about the dataset, e.g. the dataset size
     logger.info(f"Datamodule instantiated: {datamodule}")
-    
+
     # NOTE: consider moving this directly into the training and testing
     logger.info("Extracting features...")
     datamodule.extract_features(inplace=True)
@@ -69,27 +70,32 @@ def main(cfg: DictConfig):
     logger.info("Performing train/test split...")
     datamodule.train_test_split(inplace=True)
     logger.info("Train/test split done.")
-    
+
     # NOTE: this needs to be a SKLearn model
     logger.info("Instantiating engine...")
     engine = instantiate(cfg.engine)
     logger.info(f"Engine instantiated: {engine}")
-    
-    # NOTE: inside the fit, we can consider implementing 
+
+    # NOTE: inside the fit, we can consider implementing
     logger.info("Fitting engine...")
     engine.fit(datamodule)
     logger.info("Engine fit complete.")
     logger.info("Testing engine...")
     engine.test(datamodule)
     logger.info("Engine test complete.")
+
+    logger.info("Waiting 2 seconds before finishing...")
+    time.sleep(2)
     # run.finish()
-    
+
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("\n\n!!!!!!! An error occurred during the classification experiment.!!!!!!!\n\n")
+        print(
+            "\n\n!!!!!!! An error occurred during the classification experiment.!!!!!!!\n\n"
+        )
         logger.error(f"An error occurred: {e}")
         # wandb.finish(exit_code=1)  # Finish the run with an error code
         raise e

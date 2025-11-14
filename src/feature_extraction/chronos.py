@@ -21,6 +21,7 @@ class ChronosExtractor:
         torch_dtype: torch.dtype = torch.float32,
         aggregator: object | str = "None",
         batch_size: int = 32,
+        mean_scale: bool = False,
     ):
         self.model_name = model_name
         self.device_map = device_map
@@ -32,6 +33,7 @@ class ChronosExtractor:
         )
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
+        self.mean_scale = mean_scale
 
     def to_dict(self):
         """
@@ -121,11 +123,14 @@ class ChronosExtractor:
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
         if self.aggregator == "None":
             # return an array of shape (batch_size, 1), where the value is 0
-            features = np.zeros((vals.shape[0], 1), dtype=np.float32)
+
+            features = self._process_channel_with_dataloader(vals[..., 0])
         else:
             # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
             # Process each channel separately using batches to avoid memory issues
             channel_features = []
+            if self.mean_scale:
+                vals = vals / torch.mean(torch.abs(vals), dim=1, keepdim=True)
             for i in range(vals.shape[2]):
                 channel_embeddings = self._process_channel_with_dataloader(vals[..., i])
                 channel_features.append(channel_embeddings)

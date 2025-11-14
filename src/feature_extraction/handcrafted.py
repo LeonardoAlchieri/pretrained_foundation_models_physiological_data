@@ -18,7 +18,7 @@ from numpy import (
     log,
     zeros,
     ndarray,
-    stack
+    stack,
 )
 from numpy.ma import masked_invalid
 from scipy.stats import linregress
@@ -170,7 +170,7 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
         `[min, max, mean, std, diff_max_min, slope, absolute_slope, mean_derivative,
         std_derivative,number_peaks,peaks_amplitude]`
     """
-    
+
     logger.debug(f"Len of eda data after removal of NaN: {len(data)}")
     if len(data) == 0:
         return zeros(len(EDA_FEATURE_NAMES))
@@ -214,12 +214,11 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
                 eda_peaks_result[1]["SCR_Amplitude"]
             )
 
-        
-        
-        peaks_result = apply_along_axis(
-            get_eda_peaks_info, axis=1, arr=data
+        peaks_result = apply_along_axis(get_eda_peaks_info, axis=1, arr=data)
+        number_of_peaks_feat, peaks_amplitude_feat = (
+            peaks_result[:, 0, :],
+            peaks_result[:, 1, :],
         )
-        number_of_peaks_feat, peaks_amplitude_feat = peaks_result[:,0,:], peaks_result[:,1,:]
 
         # eda_peaks_result: dict[str, Any] = eda_peaks(
         #     data,
@@ -252,7 +251,6 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
         )
         # spectral energy
         spectral_energy = abs(nansum(data, axis=1)) / sampling_rate
-        
 
         return stack(
             [
@@ -272,18 +270,18 @@ def handcrafted_eda_features(data: ndarray, sampling_rate: int = 4) -> ndarray:
                 information_entropy,
                 spectral_energy,
             ],
-            axis=1
+            axis=1,
         )
-        
-        
+
+
 class HandcraftedFeatureExtractor:
     """
     A class to extract handcrafted features from EDA signals.
     """
-    
+
     def __init__(self, sampling_rate: int = 4):
         self.sampling_rate = sampling_rate
-        
+
     def to_dict(self):
         """
         Returns a dictionary representation of the class.

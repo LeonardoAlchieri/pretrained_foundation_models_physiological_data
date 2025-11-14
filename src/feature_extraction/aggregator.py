@@ -3,13 +3,14 @@ import numpy as np
 
 class MeanChanAggregator:
     # NOTE: the input is (channels, batch, time, features) or (channels, batch, features)
-    def __call__(self, arr: np.ndarray) -> np.ndarray:
+    def __call__(self, arr: list[np.ndarray]) -> np.ndarray:
         return np.mean(arr, axis=0, keepdims=False)
-    
+
+
 class MeanTimeAggregator:
     def __call__(self, arr: np.ndarray) -> np.ndarray:
         arr = np.asarray(arr)
-        
+
         if arr.ndim == 4:
             # NOTE: reshape array as (batch, channels, time, features) instead of (channels, batch, time, features)
             arr = np.transpose(arr, (1, 0, 2, 3))
@@ -19,8 +20,11 @@ class MeanTimeAggregator:
             arr = np.transpose(arr, (1, 0, 2))
             return arr
         else:
-            raise ValueError(f"Unsupported array shape: {arr.shape}. Expected 2D or 3D array.")
-    
+            raise ValueError(
+                f"Unsupported array shape: {arr.shape}. Expected 2D or 3D array."
+            )
+
+
 class CatAggregator:
 
     def __call__(self, arr: np.ndarray) -> np.ndarray:

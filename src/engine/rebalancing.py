@@ -26,7 +26,7 @@ class GroupUnderSampler:
                 sampling_strategy=self.sampling_strategy,
                 replacement=self.replacement,
             )
-            
+
             X_resampled_group, y_resampled_group = rus.fit_resample(X_group, y_group)
             X_resampled.append(X_resampled_group)
             y_resampled.append(y_resampled_group)
@@ -36,11 +36,11 @@ class GroupUnderSampler:
 
         y_resampled = np.concatenate(y_resampled)
         return X_resampled, y_resampled
-    
+
     # Returns true if group contains one class only.
     @staticmethod
     def check_user_one_class(group) -> bool:
-        if np.unique(group).size == 1: 
+        if np.unique(group).size == 1:
             return True
         return False
 

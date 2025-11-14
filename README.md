@@ -149,7 +149,7 @@ configs/classification/
 ├── validation_method/     # Cross-validation strategies
 ├── aggregator/           # Feature aggregation methods
 ├── label_processor/      # Label processing methods
-├── scaling_method/       # Data scaling methods
+├── feature_scaling_method/       # Data scaling methods
 ├── resampling/           # Resampling strategies
 ├── usilaughs.yaml        # Dataset-specific experiment configs
 ├── seed.yaml

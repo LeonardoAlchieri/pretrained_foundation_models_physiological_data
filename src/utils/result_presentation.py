@@ -70,6 +70,7 @@ def present_results(
     which_test: str = "friedmann-nemenyi",
     test_args: dict = {},
     average_over_seed: bool = False,
+    show_tests: bool = True,
 ) -> None:
     results = []
     for reports_path in paths:
@@ -113,10 +114,23 @@ def present_results(
             if "resampling" in conf
             else "None"
         )
+
+        if "channels" in conf["datamodule"].keys():
+            channels = str(conf["datamodule"]["channels"])
+        else:
+            channels = "[0,1,2]"
         resampling = resampling if resampling != "NoUnderSampler" else "None"
         # Collect results in a list of dicts
         if remove_xgboost and model_name == "XGBClassifier":
             continue
+
+        if "feature_scaling_method" in conf.keys():
+            feature_scaling_method = conf["feature_scaling_method"]["_target_"].split(
+                "."
+            )[-1]
+        else:
+            feature_scaling_method = "Unknown"
+
         results.append(
             {
                 "Dataset": dataset,
@@ -129,6 +143,8 @@ def present_results(
                 "Aggregator": aggregator,
                 "Validation": validation_method,
                 "Detailed Report": report,
+                "Channels": channels,
+                "Feature Scaling": feature_scaling_method,
                 **report_results,
             }
         )
@@ -220,6 +236,8 @@ def present_results(
                     "Resampling",
                     "Side",
                     "Validation",
+                    "Channels",
+                    "Feature Scaling",
                 ]
             ).apply(mean_of_mean, include_groups=False)
             display(grouped_data)
@@ -253,28 +271,32 @@ def present_results(
             with open(latex_path, "w") as f:
                 f.write(grouped_data.to_latex())
 
-            if "aggregator" in test_args.keys() and group["Aggregator"].nunique() > 2:
-                group = group[
-                    (group["Aggregator"] == test_args["aggregator"])
-                    | (group["Aggregator"].isnull())
-                ]
+            if show_tests:
+                if (
+                    "aggregator" in test_args.keys()
+                    and group["Aggregator"].nunique() > 2
+                ):
+                    group = group[
+                        (group["Aggregator"] == test_args["aggregator"])
+                        | (group["Aggregator"].isnull())
+                    ]
 
-            unravelled_detailed_results = {
-                metric: {} for metric in group["Detailed Report"].iloc[0].columns
-            }
-            for i, model_results in group.iterrows():
-                for metric in model_results["Detailed Report"].columns:
-                    cv_results = model_results["Detailed Report"][metric]
-                    unravelled_detailed_results[metric][
-                        (model_results["Model"], model_results["Features"])
-                    ] = cv_results
+                unravelled_detailed_results = {
+                    metric: {} for metric in group["Detailed Report"].iloc[0].columns
+                }
+                for i, model_results in group.iterrows():
+                    for metric in model_results["Detailed Report"].columns:
+                        cv_results = model_results["Detailed Report"][metric]
+                        unravelled_detailed_results[metric][
+                            (model_results["Model"], model_results["Features"])
+                        ] = cv_results
 
-            if which_test == "friedmann-nemenyi":
-                friedmann_nemenyi_test(unravelled_detailed_results)
-            elif which_test == "alignedfriedmann-holm":
-                aligned_friedmann_holm_test(unravelled_detailed_results)
-            else:
-                raise ValueError(f"Unknown test: {which_test}")
+                if which_test == "friedmann-nemenyi":
+                    friedmann_nemenyi_test(unravelled_detailed_results)
+                elif which_test == "alignedfriedmann-holm":
+                    aligned_friedmann_holm_test(unravelled_detailed_results)
+                else:
+                    raise ValueError(f"Unknown test: {which_test}")
         except Exception as e:
             print(
                 f"Error processing group {dataset}, {side}, {label_name}, {resampling}: {e}"

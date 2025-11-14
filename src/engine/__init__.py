@@ -125,7 +125,7 @@ class Engine:
                     f"Number of trained models and feature extractors do not match. Received: {len(self.models)} models and {len(self.trainable_features_extractor_list)} feature extractors."
                 )
 
-    def test(self, datamodule: EDADataset):
+    def test(self, datamodule: EDADataset, save: bool = True) -> dict[int, dict]:
         all_accuracies = []
         for fold_idx, (Xy_test) in tqdm(
             enumerate(datamodule.test_data_folds),
@@ -154,7 +154,9 @@ class Engine:
                 }
             )
         logger.info({f"mean_{self.scoring.__name__}": float(np.mean(all_accuracies))})
-        self._save_local_results()
+        if save:
+            self._save_local_results()
+        return self.fold_reports
 
     def _save_local_results(self):
         save_path = HydraConfig.get().runtime.output_dir

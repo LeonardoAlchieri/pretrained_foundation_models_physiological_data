@@ -1,6 +1,7 @@
 from typing import Callable
 from omegaconf import DictConfig
 
+
 def check_aggregator(aggregator: Callable | str | DictConfig) -> Callable | str:
     """
     Checks if the aggregator is a valid callable or a string.
@@ -17,9 +18,10 @@ def check_aggregator(aggregator: Callable | str | DictConfig) -> Callable | str:
     """
     if isinstance(aggregator, DictConfig):
         if "_value_" in aggregator.keys():
-            return aggregator['_value_']
+            return aggregator["_value_"]
         else:
-            raise ValueError(f"Invalid aggregator configuration. Received {aggregator}.")
+            raise ValueError(
+                f"Invalid aggregator configuration. Received {aggregator}."
+            )
     else:
         return aggregator
-        

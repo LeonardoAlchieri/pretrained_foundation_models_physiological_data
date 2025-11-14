@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 
 from tqdm.auto import tqdm
 
+
 class MOMENTExtractor:
     """
     A class to extract handcrafted features from EDA signals.
@@ -33,7 +34,7 @@ class MOMENTExtractor:
         self.batch_size = batch_size
         self.device_map = device_map
         self.torch_dtype = torch_dtype
-        
+
     def to_dict(self):
         """
         Returns a dictionary representation of the class.
@@ -88,7 +89,9 @@ class MOMENTExtractor:
 
         return np.concatenate(all_embeddings, axis=0)
 
-    def _process_channel_in_batches(self, vals: torch.Tensor, channel_idx: int) -> np.ndarray:
+    def _process_channel_in_batches(
+        self, vals: torch.Tensor, channel_idx: int
+    ) -> np.ndarray:
         """
         Process a single channel's data in batches using DataLoader to avoid memory issues.
 

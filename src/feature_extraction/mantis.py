@@ -142,10 +142,10 @@ class MantisExtractor:
         for batch in tqdm(dataloader, desc="Batch progress"):
             batch_data: torch.Tensor = batch[0]  # Extract the data from the batch
             batch_data = self._pad_len(batch_data, self.network.seq_len)
-            batch_data = batch_data.movedim(1, 2)  # Change shape to (batch_size, channels, time)
-            batch_embeddings = (
-                self.pipeline.transform(batch_data)
-            )
+            batch_data = batch_data.movedim(
+                1, 2
+            )  # Change shape to (batch_size, channels, time)
+            batch_embeddings = self.pipeline.transform(batch_data)
             # batch_embeddings = batch_embeddings[:, :, :num_real_patches, :]
             # swap axis 0 and 1 to have shape (channels,batch_size,time,features) from (batch_size, channels, time, features)
             # batch_embeddings = np.transpose(batch_embeddings, (1, 0, 2, 3))

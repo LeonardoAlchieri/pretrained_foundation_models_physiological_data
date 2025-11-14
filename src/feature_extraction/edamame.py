@@ -1,37 +1,58 @@
+from typing import Callable, Optional
+
 import numpy as np
 import torch
+from edamame.pipeline import EdamamePipeline
+from pytorch_lightning import LightningModule
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm.auto import tqdm
-from transformers import PatchTSMixerForPrediction
-from scipy import signal
 
 from src.data import EDADataset
 from src.utils.config import check_aggregator
 from src.utils.typing import DataInfo
 
 
-# TODO: create class from which the main configs are inherited for all feature extractors
-class TimeMixerExtractor:
+class EdamameExtractor:
     """
     A class to extract handcrafted features from EDA signals.
     """
 
     def __init__(
         self,
-        model_name: str,
+        model_name: str | LightningModule,
+        checkpoint_path: str,
         device_map: str = "cpu",
+        normalization_fn: Optional[Callable] = None,
         torch_dtype: torch.dtype = torch.float32,
         aggregator: object | str = "None",
         batch_size: int = 32,
-        channel_together: bool = True,
     ):
-        self.pipeline_name = model_name
+        self.model_name = model_name
         self.device_map = device_map
         self.torch_dtype = torch_dtype
-        self.pipeline = PatchTSMixerForPrediction.from_pretrained(self.pipeline_name)
+        UserWarning("torch_dtype parameter is currently not used in EdamameExtractor")
+        if isinstance(model_name, str):
+            self.pipeline = EdamamePipeline.from_pretrained(
+                model_name,
+                weights_path=checkpoint_path,
+                device_map=device_map,
+                torch_dtype=torch_dtype,
+                normalization_fn=normalization_fn,
+            )
+        elif isinstance(model_name, LightningModule):
+            self.pipeline = EdamamePipeline(
+                model=model_name,
+                model_name=None,
+                device=self.device_map,
+                normalization_fn=normalization_fn,
+                model_config={},
+            )
+        else:
+            raise TypeError(
+                f"model_name must be a string or a LightningModule instance. Got {type(model_name)} instead."
+            )
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
-        self.channel_together = channel_together
 
     def to_dict(self):
         """
@@ -39,7 +60,7 @@ class TimeMixerExtractor:
         """
         return {
             "name": self.__class__.__name__,
-            "model_name": self.pipeline_name,
+            "model_name": self.model_name,
             "device_map": self.device_map,
             "torch_dtype": str(self.torch_dtype),
             "aggregator": str(self.aggregator.__class__.__name__),
@@ -69,40 +90,13 @@ class TimeMixerExtractor:
             batch_data = channel_data[i:batch_end]
 
             # Process the batch
-            batch_embeddings = self.pipeline.embed(batch_data)[0].numpy()
+            batch_embeddings = self.pipeline.embed(
+                batch_data, mask_ratio=0, return_mask=False
+            )[0].numpy()
             all_embeddings.append(batch_embeddings)
 
         # Concatenate all batch results
         return np.concatenate(all_embeddings, axis=0)
-
-    @staticmethod
-    def _pad_len(x: torch.Tensor, target_len: int) -> torch.Tensor:
-        """
-        Pads the input tensor to the target length.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input tensor to be padded.
-        target_len : int
-            Target length for padding.
-
-        Returns
-        -------
-        torch.Tensor
-            Padded tensor.
-        """
-        seq_len = x.shape[1]
-        if seq_len < target_len:
-            pad_width = ((0, 0), (0, target_len - seq_len), (0, 0))
-            X_padded = np.pad(x, pad_width, mode="constant")
-        elif seq_len > target_len:
-            # If the sequence is longer than the target, resample to match the target length
-            x = x.numpy()
-            X_padded = signal.resample(x, target_len, axis=1)
-        else:
-            X_padded = x
-        return torch.Tensor(X_padded)
 
     def _process_channel_with_dataloader(
         self, channel_data: torch.Tensor
@@ -121,32 +115,19 @@ class TimeMixerExtractor:
             Embedded features for the channel
         """
         # Create a TensorDataset and DataLoader for batching
-
-        if channel_data.ndim < 3:
-            channel_data = channel_data.unsqueeze(2)
-
-        num_real_patches = (
-            1
-            + (channel_data.shape[1] - self.pipeline.config.patch_length)
-            // self.pipeline.config.patch_stride
-        )
         dataset = TensorDataset(channel_data)
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_embeddings = []
         for batch in tqdm(dataloader, desc="Batch progress"):
-            batch_data: torch.Tensor = batch[0]  # Extract the data from the batch
-            batch_data = self._pad_len(batch_data, self.pipeline.config.context_length)
-            batch_embeddings = (
-                self.pipeline(batch_data).last_hidden_state.detach().cpu().numpy()
-            )
-            batch_embeddings = batch_embeddings[:, :, :num_real_patches, :]
-            # swap axis 0 and 1 to have shape (channels,batch_size,time,features) from (batch_size, channels, time, features)
-            batch_embeddings = np.transpose(batch_embeddings, (1, 0, 2, 3))
+            batch_data = batch[0]  # Extract the data from the batch
+            batch_embeddings = self.pipeline.embed(batch_data, mask_ratio=0).numpy()
+            # batch_embeddings = np.mean(batch_embeddings, axis=1)  # Average over patch dimension
+            batch_embeddings = batch_embeddings.reshape(batch_data.shape[0], -1)
             all_embeddings.append(batch_embeddings)
 
         # Concatenate all batch results
-        return np.concatenate(all_embeddings, axis=1)
+        return np.concatenate(all_embeddings, axis=0)
 
     def __call__(self, data: DataInfo) -> EDADataset:
         """
@@ -165,26 +146,25 @@ class TimeMixerExtractor:
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
         if self.aggregator == "None":
             # return an array of shape (batch_size, 1), where the value is 0
-            if vals.ndim < 3:
-                features = self._process_channel_with_dataloader(vals)
-            else:
-                features = self._process_channel_with_dataloader(vals[..., 0])
+            features = self._process_channel_with_dataloader(vals[..., [0]])
         else:
-            if not self.channel_together:
-                # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
-                # Process each channel separately using batches to avoid memory issues
-                channel_features = []
-                for i in range(vals.shape[2]):
-                    channel_embeddings = self._process_channel_with_dataloader(
-                        vals[..., i]
-                    )
-                    channel_features.append(channel_embeddings[0, ...])
-            else:
-                # Process all channels together
-                channel_features = self._process_channel_with_dataloader(vals)
+            # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
+            # Process each channel separately using batches to avoid memory issues
+            channel_features = []
+            for i in range(vals.shape[2]):
+                channel_embeddings = self._process_channel_with_dataloader(
+                    vals[..., [i]]
+                )
+                channel_features.append(channel_embeddings)
 
             features: np.ndarray = self.aggregator(channel_features)
-
+            # features = np.stack(
+            #     [
+            #         self.pipeline.embed(vals[..., i])[0].mean(axis=1).numpy()
+            #         for i in range(vals.shape[2])
+            #     ],
+            #     axis=2,
+            # )
         features = np.ma.masked_invalid(features, copy=False)
         data["features"] = features.reshape(features.shape[0], -1)
         data["feature_names"] = None
