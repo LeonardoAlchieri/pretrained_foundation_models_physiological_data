@@ -3,10 +3,10 @@ import os
 from logging import getLogger
 from pathlib import Path
 from pprint import pprint
-import stat
-from sklearn.base import TransformerMixin
+from typing import Optional, Callable
 
 import numpy as np
+from sklearn.base import TransformerMixin
 
 from src.utils.typing import DataInfo
 
@@ -24,8 +24,10 @@ class EDADataset:
         validation_method: object,
         feature_extractor: object,
         label_processor: TransformerMixin,
-        scaling_method: TransformerMixin,
+        feature_scaling_method: TransformerMixin,
+        sample_scaling_method: Callable | None = None,
         recompute_features: bool = False,
+        channels: Optional[list[int] | int] = None,
         debug: bool = False,
     ):
         """
@@ -36,14 +38,15 @@ class EDADataset:
         self.path_to_data = path_to_data
         self.label_processor = label_processor
 
-        self.data = self._load_data(path_to_data)
+        self.sample_scaling_method = sample_scaling_method
+        self.data = self._load_data(path_to_data, channels=list(channels))
         self.validation_method = validation_method
         self.extracted_features: bool = False
         self.feature_extractor = feature_extractor
         self.cache_path = self._get_cache_path()
         self.recompute_features = recompute_features
 
-        self.scaling_method = scaling_method
+        self.feature_scaling_method = feature_scaling_method
 
         self.debug = debug
 
@@ -91,7 +94,7 @@ class EDADataset:
             # data["labels"] = data["labels"].data[mask]  # convert to regular ndarray
         return data
 
-    def _load_data(self, path: str) -> DataInfo:
+    def _load_data(self, path: str, channels: Optional[list[int]] = None) -> DataInfo:
         """
         Load the dataset.
         This method should be implemented to load the actual dataset.
@@ -111,6 +114,16 @@ class EDADataset:
                 f"""Labels shape got messed up when using the label processor. Are you sure you used the correct one?\n
                 Received labels shape: {loaded_data["labels"].shape}, values shape: {loaded_data["values"].shape}, label processor: {self.label_processor.__class__.__name__}"""
             )
+
+        if channels is not None:
+            loaded_data["values"] = loaded_data["values"][..., channels]
+
+        if self.sample_scaling_method is not None:
+            loaded_data["values"] = self.sample_scaling_method(
+                loaded_data["values"], loaded_data["groups"]
+            )
+
+        logger.info(f"Data shape after loading: {loaded_data['values'].shape}")
 
         return loaded_data
 
@@ -133,9 +146,8 @@ class EDADataset:
         Extract features from the dataset using the provided feature extractor.
         """
         if not self._check_and_load_from_cache():
-
             self.data = self.feature_extractor(self.data)
-            self.data["features"] = self.scaling_method.fit_transform(
+            self.data["features"] = self.feature_scaling_method.fit_transform(
                 self.data["features"]
             )
             np.save(
