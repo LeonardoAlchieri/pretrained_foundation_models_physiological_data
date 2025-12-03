@@ -1,22 +1,28 @@
 defaults:
   - default
   - sweeps@_here_: basic
-  - override dataset: hearts
-  - override label_processor: binarizer
+  - override dataset: bihearts
+  - override label_processor: label_binarizer
   - _self_
 
 label_name: sleep_wake # accepted: sleep_wake, sleep_quality
 dataset.side: left # accepted: left, right
-segment_length: 600
-device_map: "cpu"
+segment_length: 60
+device_map: "mps"
 
-label_processor:
-  threshold: 5 # TODO: check if correct
+# label_processor:
+#   threshold: 5 # TODO: check if correct
 
 # TODO: test if this is working!
-hydra:
-  sweeper:
-    list_params:
-      label_name: sleep_wake, sleep_quality
-      label_processor: label_binarizer, binarizer
-      
+# hydra:
+#   sweeper:
+#     list_params:
+#       label_name: sleep_wake, sleep_quality
+#       label_processor: label_binarizer, binarizer
+
+datamodule:
+  recompute_features: true
+#   channels: [1, 2] # 0 mixed, 1 phasic, 2 tonic
+#   sample_scaling_method: 
+#     _target_: edamame.utils.sample_scaling.min_max_scaling_per_user
+#     _partial_: true

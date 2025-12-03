@@ -1,0 +1,10 @@
+_target_: edamame_downstream.feature_extraction.edamame.EdamameExtractor
+model_name: "mae"
+checkpoint_path: "/Users/leonardoalchieri/Desktop/GIT-Mine/pretrained_foundation_models_physiological_data/artifacts/MAE-phasic.ckpt"
+device_map: ${device_map}
+# torch_dtype: "auto"
+aggregator: ${aggregator}
+normalization_fn: 
+  _target_: edamame.utils.sample_scaling.mean_scaling
+  _partial_: true
+batch_size: 128

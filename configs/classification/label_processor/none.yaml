@@ -1,1 +1,1 @@
-_target_: src.label_processor.none.NoneLabelProcessor
+_target_: edamame_downstream.label_processor.none.NoneLabelProcessor

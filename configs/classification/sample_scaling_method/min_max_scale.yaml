@@ -1,0 +1,2 @@
+_target_: edamame.utils.sample_scaling.min_max_scaling
+_partial_: true

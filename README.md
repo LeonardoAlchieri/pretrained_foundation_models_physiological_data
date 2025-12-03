@@ -27,7 +27,7 @@ Recent advances in foundation models have demonstrated remarkable capabilities i
 The codebase is organized into several key components:
 
 ```
-src/
+edamame_downstream/
 ├── data/               # Dataset loading and preprocessing
 ├── feature_extraction/ # Foundation model feature extractors
 │   ├── chronos.py     # Amazon Chronos models
@@ -258,7 +258,7 @@ The `additional_notebook/` folder contains notebooks that were used during the i
 
 ### Adding New Models
 
-1. Create a new feature extractor in `src/feature_extraction/`:
+1. Create a new feature extractor in `edamame_downstream/feature_extraction/`:
 ```python
 class NewModelExtractor:
     def __init__(self, model_name: str, **kwargs):
@@ -273,7 +273,7 @@ class NewModelExtractor:
 
 2. Add configuration file in `configs/classification/feature_extractor/`:
 ```yaml
-_target_: src.feature_extraction.new_model.NewModelExtractor
+_target_: edamame_downstream.feature_extraction.new_model.NewModelExtractor
 model_name: "your-model-name"
 device_map: ${device_map}
 ```
@@ -321,7 +321,7 @@ hydra:
 
 ### Adding Trainable Feature Extractors
 
-1. Create a new trainable feature extractor in `src/model/trainable_feature_extraction/`:
+1. Create a new trainable feature extractor in `edamame_downstream/model/trainable_feature_extraction/`:
 ```python
 class NewTrainableExtractor:
     def __init__(self, random_state: int):
@@ -339,7 +339,7 @@ class NewTrainableExtractor:
 
 2. Add configuration in `configs/classification/trainable_feature_extractor/`:
 ```yaml
-_target_: src.model.trainable_feature_extraction.new_extractor.NewTrainableExtractor
+_target_: edamame_downstream.model.trainable_feature_extraction.new_extractor.NewTrainableExtractor
 random_state: ${seed}
 ```
 

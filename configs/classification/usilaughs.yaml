@@ -1,14 +1,20 @@
 defaults:
   - default
-  - sweeps@_here_: giofeatures
+  - sweeps@_here_: basic
   - override dataset: usilaughs
   - override label_processor: none
   - _self_
 
-# NOTE: we define the variable as global, instad of calling `dataset.var`, in order not
-# to have default values in the dataset config file.
 label_name: cognitiveload # accepted: cognitiveload
 dataset.side: right # accepted: right, left
-segment_length: 4 # in seconds
+segment_length: 60 # in seconds
 device_map: "cpu" # accepted: "cpu", "cuda", "mps"
+# FIXME: device_map is not working
+# NOTE: edamame does not support mps. I need to fix it.
 
+datamodule:
+  recompute_features: true
+#   channels: [1, 2] # 0 mixed, 1 phasic, 2 tonic
+#   sample_scaling_method: 
+#     _target_: edamame.utils.sample_scaling.min_max_scaling
+#     _partial_: true

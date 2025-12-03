@@ -14,30 +14,30 @@ hydra:
       validation_method: tacv, lnpo
     list_params:
       model: 
+        - xgboost
         - random_baseline
-        - logistic_regression
-        - logistic_regression
-        - logistic_regression
-        - knn
-        - cksvc
+        # - logistic_regression
+        # - logistic_regression
+        # - logistic_regression
+        # - cksvc
       aggregator: 
         - none
         - none
-        - mean_chan
-        - none
-        - none
-        - none
+        # - none
+        # - mean_chan
+        # - none
+        # - none
       feature_extractor: 
+        - handcrafted 
         - handcrafted
-        - handcrafted
-        - timemixer
-        - none
-        - none
-        - none
+        # - handcrafted
+        # - timemixer
+        # - none
+        # - none
       trainable_feature_extractor: 
         - none
         - none
-        - none
-        - minirocket
-        - minirocket
-        - minirocket
+        # - none
+        # - none
+        # - minirocket
+        # - minirocket

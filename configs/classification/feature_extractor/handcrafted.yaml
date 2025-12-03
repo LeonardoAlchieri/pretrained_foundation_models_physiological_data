@@ -1,2 +1,4 @@
-_target_: src.feature_extraction.handcrafted.HandcraftedFeatureExtractor
+_target_: edamame_downstream.feature_extraction.handcrafted.HandcraftedFeatureExtractor
 sampling_rate: ${sampling_rate} # Hz
+max_workers: 8
+chunksize: 256

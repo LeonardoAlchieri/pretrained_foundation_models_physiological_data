@@ -1,0 +1,2 @@
+_target_: edamame_downstream.utils.data_preparation.empty_scaler
+_partial_: true

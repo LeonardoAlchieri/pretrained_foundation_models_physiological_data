@@ -1,2 +1,2 @@
-_target_: src.model.trainable_feature_extraction.minirocket.MiniRocket
+_target_: edamame_downstream.model.trainable_feature_extraction.minirocket.MiniRocket
 random_state: ${seed}

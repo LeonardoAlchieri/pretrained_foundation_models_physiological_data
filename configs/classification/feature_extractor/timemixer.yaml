@@ -1,4 +1,4 @@
-_target_: src.feature_extraction.timemixer.TimeMixerExtractor
+_target_: edamame_downstream.feature_extraction.timemixer.TimeMixerExtractor
 model_name: "ibm-granite/granite-timeseries-patchtsmixer"
 device_map: ${device_map}
 torch_dtype: "auto"

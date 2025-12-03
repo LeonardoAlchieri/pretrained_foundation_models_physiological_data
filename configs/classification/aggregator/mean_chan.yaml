@@ -1,1 +1,1 @@
-_target_: src.feature_extraction.aggregator.MeanChanAggregator
+_target_: edamame_downstream.feature_extraction.aggregator.MeanChanAggregator

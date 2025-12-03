@@ -1,0 +1,12 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.py
+recursive-include edamame_downstream *.py
+recursive-include configs *.yaml
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude data.nosync *
+recursive-exclude outputs* *
+recursive-exclude wandb *
+recursive-exclude additional_notebook *

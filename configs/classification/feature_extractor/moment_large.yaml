@@ -1,4 +1,4 @@
-_target_: src.feature_extraction.moment.MOMENTExtractor
+_target_: edamame_downstream.feature_extraction.moment.MOMENTExtractor
 model_name: "AutonLab/MOMENT-1-large"
 device_map: ${device_map}
 torch_dtype: "auto"

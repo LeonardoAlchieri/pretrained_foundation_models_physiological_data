@@ -34,9 +34,7 @@ logger = getLogger(__name__)
 #     return True
 
 
-@hydra.main(
-    config_path="./configs/classification", config_name="usilaughs", version_base="1.3"
-)
+@hydra.main(config_path="./configs/classification", config_name="usilaughs", version_base="1.3")
 def main(cfg: DictConfig):
     # run = wandb.init(project="pretrained_foundation_models_physiological_data",
     #                  config=OmegaConf.to_container(cfg, resolve=True))
@@ -93,9 +91,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print(
-            "\n\n!!!!!!! An error occurred during the classification experiment.!!!!!!!\n\n"
-        )
+        print("\n\n!!!!!!! An error occurred during the classification experiment.!!!!!!!\n\n")
         logger.error(f"An error occurred: {e}")
         # wandb.finish(exit_code=1)  # Finish the run with an error code
         raise e

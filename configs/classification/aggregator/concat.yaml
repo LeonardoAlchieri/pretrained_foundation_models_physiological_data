@@ -1,1 +1,1 @@
-_target_: src.feature_extraction.aggregator.CatAggregator
+_target_: edamame_downstream.feature_extraction.aggregator.CatAggregator
