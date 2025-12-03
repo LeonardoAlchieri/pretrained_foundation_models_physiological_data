@@ -165,9 +165,11 @@ class Engine:
         for metric, (mean, sem_value) in mean_reports.items():
             logger.info(f"{metric}: {mean*100:.2f} ± {sem_value*100:.2f} %")
             if lightning_logger is not None:
-                lightning_logger.log_hyperparams(
-                    {"dataset": datamodule.name, metric: mean, f"{metric}_sem": sem_value}
-                )
+                lightning_logger.log_metrics({
+                    f"{datamodule.name}/{metric}": mean * 100,
+                    f"{datamodule.name}/{metric}_max": (mean+sem_value*1.98) * 100,
+                    f"{datamodule.name}/{metric}_min": (mean-sem_value*1.98) * 100,
+                })
         if save:
             self._save_local_results()
         return self.fold_reports

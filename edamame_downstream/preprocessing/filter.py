@@ -78,9 +78,7 @@ def butter_lowpass(cutoff: float, fs: int, order: int) -> tuple[float, float]:
     return b, a
 
 
-def butter_lowpass_filter_filtfilt(
-    data: ndarray, cutoff: float, fs: int, order: int
-) -> ndarray:
+def butter_lowpass_filter_filtfilt(data: ndarray, cutoff: float, fs: int, order: int) -> ndarray:
     """Method to create and then apply a digital filter forward and backward to a signal.
 
     Args:
@@ -97,9 +95,7 @@ def butter_lowpass_filter_filtfilt(
     return y
 
 
-def butter_lowpass_filter_lfilter(
-    data: ndarray, cutoff: float, fs: int, order: int
-) -> ndarray:
+def butter_lowpass_filter_lfilter(data: ndarray, cutoff: float, fs: int, order: int) -> ndarray:
     """Method to create and then apply an IIR or FIR filter.
 
     Args:
@@ -178,9 +174,7 @@ def moving_avg_acc(data: ndarray | DataFrame, window_size: int) -> ndarray:
             for n in range(0, len(acc_data) - window_size, 1)
         ]
     )
-    logger.debug(
-        f"Lenght of avg filteres: {len(avgs)}; lengths of inout data: {len(acc_data)}"
-    )
+    logger.debug(f"Lenght of avg filteres: {len(avgs)}; lengths of inout data: {len(acc_data)}")
     # NOTE: I pad to nans in order to have an array of the same length as the input one
     avgs = pad(avgs, (-len(avgs) + len(acc_data), 0), "constant", constant_values=nan)
     logger.debug(f"Average evaluated: {avgs}")
