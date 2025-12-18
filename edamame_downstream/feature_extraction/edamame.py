@@ -143,7 +143,7 @@ class EdamameExtractor:
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
         if self.aggregator == "None":
             # return an array of shape (batch_size, 1), where the value is 0
-            features = self._process_channel_with_dataloader(vals[..., [0]])
+            features = self._process_channel_with_dataloader(vals)
         else:
             # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
             # Process each channel separately using batches to avoid memory issues
