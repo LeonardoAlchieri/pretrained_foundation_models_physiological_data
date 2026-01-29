@@ -130,13 +130,14 @@ class EDADataset:
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-
-        loaded_data["labels"] = (
-            self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1))
-            .reshape(-1)
-            .astype(int)
-        )
+        
+        try:
+            loaded_data["labels"] = loaded_data["labels"].astype(np.float32)
+        except (ValueError, TypeError):
+            pass  # keep original type if conversion fails
+        loaded_data["labels"] = (self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1)).reshape(-1))
         loaded_data = self.remove_masked_labels(loaded_data)
+        loaded_data["labels"] = loaded_data["labels"].astype(np.int32)
 
         if loaded_data["labels"].shape[0] != loaded_data["values"].shape[0]:
             # TODO: add more info to the error (e.g. shapes and label_processor name)

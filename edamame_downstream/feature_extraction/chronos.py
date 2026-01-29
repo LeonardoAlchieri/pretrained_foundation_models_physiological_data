@@ -64,7 +64,7 @@ class ChronosExtractor:
         """
         all_embeddings = []
 
-        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress"):
+        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress", leave=False):
             batch_end = min(i + self.batch_size, channel_data.shape[0])
             batch_data = channel_data[i:batch_end]
 
@@ -94,7 +94,7 @@ class ChronosExtractor:
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_embeddings = []
-        for batch in tqdm(dataloader, desc="Batch progress"):
+        for batch in tqdm(dataloader, desc="Batch progress", leave=False):
             batch_data = batch[0]  # Extract the data from the batch
             batch_embeddings = self.pipeline.embed(batch_data)[0].numpy()
             all_embeddings.append(batch_embeddings)
@@ -119,7 +119,7 @@ class ChronosExtractor:
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
         if self.aggregator == "None":
             # return an array of shape (batch_size, 1), where the value is 0
-
+            raise NotImplementedError("Aggregator 'None' is not implemented yet.")
             features = self._process_channel_with_dataloader(vals[..., 0])
         else:
             # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
@@ -130,7 +130,7 @@ class ChronosExtractor:
             for i in range(vals.shape[2]):
                 channel_embeddings = self._process_channel_with_dataloader(vals[..., i])
                 channel_features.append(channel_embeddings)
-
+            
             features: np.ndarray = self.aggregator(channel_features)
             # features = np.stack(
             #     [

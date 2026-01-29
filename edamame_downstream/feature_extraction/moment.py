@@ -140,6 +140,7 @@ class MOMENTExtractor:
             for i in range(vals.shape[1]):
                 channel_embeddings = self._process_channel_in_batches(vals, i)
                 channel_features.append(channel_embeddings)
+            channel_features = np.stack(channel_features, axis=2)
 
             features: np.ndarray = self.aggregator(channel_features)
 

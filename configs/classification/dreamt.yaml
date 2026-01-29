@@ -1,0 +1,16 @@
+defaults:
+  - default
+  - sweeps@_here_: basic
+  - override dataset: dreamt
+  - override label_processor: custom_selector
+  - _self_
+
+label_name: Sleep_Stage
+segment_length: 60
+device_map: "mps"
+
+label_processor:
+  positive_class: ["R", "N3", "N2", "N1"]
+  negative_class: ["W", "P"]
+  # positive_class: ["N3"]
+  # negative_class: ["R"]

@@ -65,7 +65,7 @@ class SundialExtractor:
         """
         all_embeddings = []
 
-        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress"):
+        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress", leave=False):
             batch_end = min(i + self.batch_size, channel_data.shape[0])
             batch_data = channel_data[i:batch_end]
 
@@ -132,7 +132,7 @@ class SundialExtractor:
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_embeddings = []
-        for batch in tqdm(dataloader, desc="Batch progress"):
+        for batch in tqdm(dataloader, desc="Batch progress", leave=False):
             batch_data: torch.Tensor = batch[0]  # Extract the data from the batch
             batch_data = self._pad_len(batch_data, self.pipeline.config.context_length)
             batch_embeddings = self.pipeline(batch_data).last_hidden_state.detach().cpu().numpy()

@@ -1,0 +1,16 @@
+defaults:
+  - default
+  - sweeps@_here_: basic
+  - override dataset: hhiss
+  - override label_processor: custom_selector
+  - _self_
+
+label_name: label # accepted: sleep_wake, SleepQuality
+segment_length: 60
+device_map: "mps"
+
+label_processor:
+  positive_class: ["calm"]
+  negative_class: ["stress"]
+  # positive_class: ["N3"]
+  # negative_class: ["R"]

@@ -7,7 +7,7 @@ defaults:
 
 label_name: sleep_wake # accepted: sleep_wake, SleepQuality
 segment_length: 60
-device_map: "cpu"
+device_map: "mps"
 
 # label_processor:
 #   threshold: 3 # TODO: check if correct

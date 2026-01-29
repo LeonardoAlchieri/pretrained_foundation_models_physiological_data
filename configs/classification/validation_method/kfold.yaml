@@ -1,0 +1,4 @@
+_target_: edamame_downstream.validation.KFoldCV
+num_folds: 5
+random_state: 42
+shuffle: true

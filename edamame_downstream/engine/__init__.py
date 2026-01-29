@@ -110,6 +110,7 @@ class Engine:
                     scoring=make_scorer(self.scoring),
                     cv=self.inner_cv_folds,
                     verbose=0,
+                    n_jobs=10,
                 )
                 clf.fit(X_train, y_train)
                 # NOTE: do not use clone, since it does not return a fitted model!

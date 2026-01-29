@@ -1,6 +1,6 @@
 _target_: edamame_downstream.label_processor.inside.InsideLabelProcessor
-lower_lower_threshold: ${dataset.lower_lower_threshold}
-lower_upper_threshold: ${dataset.lower_upper_threshold}
-upper_upper_threshold: ${dataset.upper_upper_threshold}
-upper_lower_threshold: ${dataset.upper_lower_threshold}
-threshold_type: percentile
+lower_lower_threshold: 1
+lower_upper_threshold: 4
+upper_upper_threshold: 9
+upper_lower_threshold: 6
+threshold_type: value

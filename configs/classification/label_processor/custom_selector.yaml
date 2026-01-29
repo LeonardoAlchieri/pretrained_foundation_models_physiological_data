@@ -1,0 +1,3 @@
+_target_: edamame_downstream.label_processor.custom_selector.CustomSelectorLabelProcessor
+positive_class: null
+negative_class: null

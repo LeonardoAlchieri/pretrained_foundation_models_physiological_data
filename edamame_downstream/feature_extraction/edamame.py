@@ -84,7 +84,7 @@ class EdamameExtractor:
         """
         all_embeddings = []
 
-        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress"):
+        for i in tqdm(range(0, channel_data.shape[0], self.batch_size), desc="Batch progress", leave=False):
             batch_end = min(i + self.batch_size, channel_data.shape[0])
             batch_data = channel_data[i:batch_end]
 
@@ -116,7 +116,7 @@ class EdamameExtractor:
         dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
 
         all_embeddings = []
-        for batch in tqdm(dataloader, desc="Batch progress"):
+        for batch in tqdm(dataloader, desc="Batch progress", leave=False):
             batch_data = batch[0]  # Extract the data from the batch
             batch_embeddings = self.pipeline.embed(batch_data, mask_ratio=0).to("cpu").numpy()
             # batch_embeddings = np.mean(batch_embeddings, axis=1)  # Average over patch dimension

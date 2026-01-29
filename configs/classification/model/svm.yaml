@@ -1,0 +1,7 @@
+model: 
+  _target_: sklearn.svm.SVC
+param_grid:
+  kernel: ["linear", "rbf", "poly"]
+  C: [0.1, 1, 10, 100]
+  gamma: ["scale", "auto"]
+  shrinking: [True, False]

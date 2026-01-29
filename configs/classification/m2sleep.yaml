@@ -5,15 +5,15 @@ defaults:
   - override label_processor: binarizer
   - _self_
 
-label_name: Avg_SleepQuality_label # accepted: Avg_SleepQuality_label, PSQI
-segment_length: 600
-device_map: "cpu"
+label_name: sleep_wake # accepted: Avg_SleepQuality_label, PSQI
+segment_length: 60
+device_map: "mps"
 
 label_processor:
   threshold: 4 # TODO: check if correct
 
 # TODO: test if this is working!
-hydra:
-  sweeper:
-    grid_params:
-      label_name: Avg_SleepQuality_label, PSQI
+# hydra:
+#   sweeper:
+#     grid_params:
+#       label_name: Avg_SleepQuality_label, PSQI

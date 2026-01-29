@@ -1,7 +1,7 @@
 defaults:
   - _self_
-  - model: logistic_regression
-  - feature_extractor: edamame_efficientnet
+  - model: xgboost
+  - feature_extractor: handcrafted
   - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
@@ -26,7 +26,7 @@ datamodule:
   feature_extractor: ${feature_extractor}
   label_processor: ${dataset.label_processor}
   feature_scaling_method: ${feature_scaling_method}
-  channels: [1] # 0 mixed, 1 phasic, 2 tonic
+  channels: [0, 1, 2] # 0 mixed, 1 phasic, 2 tonic
   sample_scaling_method: ${sample_scaling_method}
   recompute_features: true
   debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!

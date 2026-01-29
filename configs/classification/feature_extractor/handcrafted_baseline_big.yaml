@@ -1,0 +1,4 @@
+_target_: edamame_downstream.feature_extraction.handcrafted_baseline_big.HandcraftedFeatureExtractor
+sampling_rate: ${sampling_rate} # Hz
+max_workers: 8
+chunksize: 256

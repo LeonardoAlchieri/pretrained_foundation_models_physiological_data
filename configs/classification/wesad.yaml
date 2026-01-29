@@ -1,0 +1,14 @@
+defaults:
+  - default
+  # - sweeps@_here_: basic
+  - override dataset: wesad
+  # - override label_processor: label_binarizer
+  - override label_processor: binarizer
+  - _self_
+
+label_name: arousal # accepted: arousal, valence
+segment_length: 60
+device_map: "mps"
+
+label_processor:
+  threshold: 5 # TODO: check if correct

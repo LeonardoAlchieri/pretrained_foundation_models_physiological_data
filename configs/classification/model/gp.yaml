@@ -1,0 +1,8 @@
+model: 
+  _target_: sklearn.gaussian_process.GaussianProcessClassifier
+param_grid:
+  kernel: [null]
+  optimizer: ["fmin_l_bfgs_b"]
+  n_restarts_optimizer: [0, 5, 10]
+  max_iter_predict: [100, 200]
+  warm_start: [True, False]

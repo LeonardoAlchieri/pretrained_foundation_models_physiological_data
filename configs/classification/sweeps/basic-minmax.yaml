@@ -11,7 +11,7 @@ hydra:
   sweeper:
     grid_params: 
       seed: 42
-      validation_method: lopo
+      validation_method: tacv
       datamodule.channels: 
       # - [0]
       # - [1]
@@ -19,35 +19,26 @@ hydra:
       - [0, 1, 2]
       # - [1, 2]
       sample_scaling_method:
-        - none
+        # - none
         # - min_max_scale
-        # - min_max_scale_per_user
+        - min_max_scale_per_user
         # - z_score
     list_params:
       model: 
       # - random_baseline
-      # - logistic_regression
-      # - logistic_regression
-      # - logistic_regression
-      # - logistic_regression
       - logistic_regression
-      # - logistic_regression
+      # - xgboost
+      - logistic_regression
       # - logistic_regression
       aggregator: 
       # - none
       # - none
+      - none
+      - none
       # - none
-      # - none
-      # - none
-      # - none
-      # - mean_time
-      - mean_time
       feature_extractor: 
       # - handcrafted
       # - handcrafted
-      # - handcrafted_baseline_small
-      # - edamame_efficientnet
-      # - edamame_efficientnet_random
+      - handcrafted
+      - edamame_efficientnet
       # - mantis
-      # - moment_large
-      - chronos_small

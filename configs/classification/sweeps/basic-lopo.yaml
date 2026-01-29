@@ -25,29 +25,24 @@ hydra:
         # - z_score
     list_params:
       model: 
-      # - random_baseline
-      # - logistic_regression
-      # - logistic_regression
-      # - logistic_regression
-      # - logistic_regression
+      - random_baseline
+      # - xgboost
+      # - xgboost
       - logistic_regression
-      # - logistic_regression
-      # - logistic_regression
+      - logistic_regression
+      - logistic_regression
+      - logistic_regression
       aggregator: 
+      - none
+      - none
+      - none
+      - none
+      - none
       # - none
-      # - none
-      # - none
-      # - none
-      # - none
-      # - none
-      # - mean_time
-      - mean_time
       feature_extractor: 
       # - handcrafted
-      # - handcrafted
-      # - handcrafted_baseline_small
-      # - edamame_efficientnet
-      # - edamame_efficientnet_random
-      # - mantis
-      # - moment_large
-      - chronos_small
+      - handcrafted
+      - handcrafted
+      - edamame_efficientnet
+      - edamame_efficientnet_random
+      - mantis

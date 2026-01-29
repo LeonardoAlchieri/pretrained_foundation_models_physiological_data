@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import GroupKFold, KFold
 from sympy import randMatrix
 from tqdm.auto import tqdm
 
@@ -8,9 +8,10 @@ from edamame_downstream.utils.typing import DataInfo
 
 # FIXME: something wrong with this one
 class TACV:
-    def __init__(self, num_folds: int, random_state: int):
+    def __init__(self, num_folds: int, random_state: int, train_ratio: float = 2 / 3):
         self.num_folds = num_folds
         self.random_state = random_state
+        self.train_ratio = train_ratio
 
     def __call__(self, data: DataInfo) -> tuple[list[DataInfo], list[DataInfo]]:
         """
@@ -44,8 +45,8 @@ class TACV:
                 label_1_indices = user_indices_sorted[labels[user_indices_sorted] == 1]
                 n0 = len(label_0_indices)
                 n1 = len(label_1_indices)
-                split_point_0 = int(np.ceil(2 * n0 / 3))
-                split_point_1 = int(np.ceil(2 * n1 / 3))
+                split_point_0 = int(np.ceil(self.train_ratio * n0))
+                split_point_1 = int(np.ceil(self.train_ratio * n1))
                 train_indices.extend(label_0_indices[:split_point_0])
                 train_indices.extend(label_1_indices[:split_point_1])
                 test_indices.extend(label_0_indices[split_point_0:])
@@ -128,6 +129,50 @@ class LNPO:
         for train_indices, test_indices in tqdm(
             gkf.split(features, labels, groups),
             desc="LNPO Splitting",
+            total=self.num_folds,
+        ):
+            train_folds.append(
+                {
+                    "features": features[train_indices],
+                    "labels": labels[train_indices],
+                    "groups": groups[train_indices],
+                }
+            )
+            test_folds.append(
+                {
+                    "features": features[test_indices],
+                    "labels": labels[test_indices],
+                    "groups": groups[test_indices],
+                }
+            )
+
+        return train_folds, test_folds
+
+
+class KFoldCV:
+    def __init__(self, num_folds: int, random_state: int, shuffle: bool = True):
+        self.num_folds = num_folds
+        self.random_state = random_state
+        self.shuffle = shuffle
+
+    def __call__(self, data: DataInfo) -> tuple[list[DataInfo], list[DataInfo]]:
+        """
+        Perform a simple K-Fold Cross-Validation split on the dataset.
+
+        :param data: The dataset to be split.
+        :return: A tuple containing the training and testing datasets for each fold.
+        """
+        features = data["features"]
+        labels = data["labels"]
+        groups = data["groups"]
+        kf = KFold(n_splits=self.num_folds, random_state=self.random_state, shuffle=self.shuffle)
+
+        train_folds = []
+        test_folds = []
+
+        for train_indices, test_indices in tqdm(
+            kf.split(features),
+            desc="KFold Splitting",
             total=self.num_folds,
         ):
             train_folds.append(

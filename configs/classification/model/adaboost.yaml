@@ -1,0 +1,5 @@
+model: 
+  _target_: sklearn.ensemble.AdaBoostClassifier
+param_grid:
+  n_estimators: [100, 200]
+  learning_rate: [0.01, 1.0]
