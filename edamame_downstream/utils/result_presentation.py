@@ -8,6 +8,7 @@ import pandas as pd
 import scikit_posthocs as sp
 from IPython.display import HTML, display
 from scipy import stats
+from tqdm import tqdm
 from yaml import safe_load
 from jmetal.lab.statistical_test.functions import (
     friedman_aligned_rank_test,
@@ -69,19 +70,68 @@ def present_results(
     test_args: dict = {},
     average_over_seed: bool = False,
     show_tests: bool = True,
-) -> None:
+    filters: dict[str, str | list[str] | None] = None,
+    exclude_filters: dict[str, str | list[str] | None] = None,
+) -> tuple:
+    """
+    Present results from classification experiments.
+    
+    Args:
+        paths: Generator of paths to reports.csv files
+        val_method: Validation method to filter by (e.g., "lopo")
+        remove_xgboost: Whether to exclude XGBoost results
+        remove_chronos_small_from_test: Whether to exclude chronos_small from tests
+        which_test: Statistical test to use ("friedmann-nemenyi" or "alignedfriedmann-holm")
+        test_args: Additional arguments for the statistical test
+        average_over_seed: Whether to average over seeds
+        show_tests: Whether to display statistical tests
+        filters: Dictionary of positive filters for grouping variables. Keys are column names
+                 (e.g., "Dataset", "Side", "Features", "Model", "Aggregator", "Channels",
+                 "Feature Scaling", "Sample Scaling", "Label Name", "Resampling").
+                 Values can be:
+                   - None: no filter (show all)
+                   - str: show only this specific value
+                   - list[str]: show only these specific values
+        exclude_filters: Dictionary of negative filters for grouping variables. Same keys as
+                 filters. Values to be excluded from results:
+                   - None: no exclusion
+                   - str: exclude this specific value
+                   - list[str]: exclude these specific values
+    """
+    if filters is None:
+        filters = {}
+    if exclude_filters is None:
+        exclude_filters = {}
+    
     results = []
-    for reports_path in paths:
+    # Convert generator to list to get length for progress bar
+    paths_list = list(paths)
+    for reports_path in tqdm(paths_list, desc="Processing reports"):
         report = pd.read_csv(reports_path, index_col=0)
         conf = safe_load(open(reports_path.parent / ".hydra/config.yaml"))
         if conf["validation_method"]["_target_"].split(".")[-1].lower() != val_method:
             continue
         model_name: str = conf["model"]["model"]["_target_"].split(".")[-1]
-        features_name = (
-            conf["feature_extractor"]["_target_"].split(".")[-1]
-            if "model_name" not in conf["feature_extractor"]
-            else conf["feature_extractor"]["model_name"]
-        )
+        
+        # Extract feature extractor name, using module name for disambiguation when needed
+        if "model_name" in conf["feature_extractor"]:
+            features_name = conf["feature_extractor"]["model_name"]
+            # Disambiguate based on checkpoint path if available (e.g., efficientnet vs efficientnet_random)
+            if "checkpoint_path" in conf["feature_extractor"]:
+                checkpoint_path = conf["feature_extractor"]["checkpoint_path"]
+                checkpoint_name = Path(checkpoint_path).stem  # Get filename without extension
+                features_name = f"{features_name}_{checkpoint_name}"
+        else:
+            feature_target = conf["feature_extractor"]["_target_"]
+            feature_parts = feature_target.split(".")
+            class_name = feature_parts[-1]
+            # Use module name for disambiguation when class name is generic (e.g., HandcraftedFeatureExtractor)
+            if class_name == "HandcraftedFeatureExtractor" and len(feature_parts) >= 2:
+                module_name = feature_parts[-2]  # e.g., "handcrafted", "handcrafted_baseline_big"
+                features_name = module_name
+            else:
+                features_name = class_name
+        
         validation_method = conf["validation_method"]["_target_"].split(".")[-1]
         if "aggregator" not in conf:
             aggregator = "MeanTimeAggregator"
@@ -97,6 +147,8 @@ def present_results(
             report_results[f"{col} sem"] = report[col].sem() * 1.98  # 95% CI
 
         seed = conf["seed"]
+        if isinstance(conf["dataset"], str):
+            print(f"{conf["dataset"]}, {reports_path} has no side information.")
         if "side" in conf["dataset"].keys():
             side = conf["dataset"]["side"]
             if side == "${side}":
@@ -107,6 +159,19 @@ def present_results(
             side = conf["side"]
             label_name = "None"
             dataset = conf["dataset"]
+        
+        # Special handling for Dreamt dataset: distinguish between sleep/wake and deep/light sleep tasks
+        # Both have label_name: Sleep_Stage but different positive/negative classes
+        if dataset == "Dreamt" and "label_processor" in conf:
+            label_proc = conf["label_processor"]
+            if "positive_class" in label_proc and "negative_class" in label_proc:
+                pos_classes = label_proc["positive_class"]
+                neg_classes = label_proc["negative_class"]
+                # Identify the task based on the class configuration
+                if set(pos_classes) == {"N3"} and set(neg_classes) == {"R"}:
+                    label_name = "DeepSleep_vs_REM"
+                elif set(pos_classes) == {"R", "N3", "N2", "N1"} and set(neg_classes) == {"W", "P"}:
+                    label_name = "Sleep_vs_Wake"
         resampling = (
             conf["resampling"]["_target_"].split(".")[-1] if "resampling" in conf else "None"
         )
@@ -131,6 +196,41 @@ def present_results(
             sample_scaling_method = sample_scaling_method["_target_"].split(".")[-1]
         else:
             sample_scaling_method = "None"
+            
+        if "subsample_train_set" in conf['engine'].keys():
+            subsample_train_set = conf['engine']["subsample_train_set"]
+            if subsample_train_set is False:
+                subsample_train_set = 1
+        else:
+            subsample_train_set = 1
+
+        # Extract timestamp from path
+        # Handles two formats:
+        # 1. Single run: .../outputs/YYYY-MM-DD/HH-MM-SS/reports.csv
+        # 2. Sweep: .../outputs/DATASET/multirun_YYYY-MM-DD-HH-MM-SS/RUN_ID/reports.csv
+        path_parts = reports_path.parts
+        timestamp = None
+        
+        # First, try to find single run format: YYYY-MM-DD followed by HH-MM-SS
+        for i, part in enumerate(path_parts):
+            if len(part) == 10 and part[4] == "-" and part[7] == "-":  # Date format YYYY-MM-DD
+                if i + 1 < len(path_parts) and len(path_parts[i + 1]) == 8:  # Time format HH-MM-SS
+                    timestamp = f"{part}_{path_parts[i + 1]}"
+                    break
+        
+        # If not found, try sweep format: multirun_YYYY-MM-DD-HH-MM-SS
+        if timestamp is None:
+            import re
+            for part in path_parts:
+                if part.startswith("multirun_"):
+                    # Extract date-time from multirun_YYYY-MM-DD-HH-MM-SS
+                    match = re.match(r"multirun_(\d{4}-\d{2}-\d{2})-(\d{2}-\d{2}-\d{2})", part)
+                    if match:
+                        timestamp = f"{match.group(1)}_{match.group(2)}"
+                        break
+        
+        if timestamp is None:
+            timestamp = "0000-00-00_00-00-00"  # Fallback for paths without timestamp
 
         results.append(
             {
@@ -147,12 +247,52 @@ def present_results(
                 "Channels": channels,
                 "Feature Scaling": feature_scaling_method,
                 "Sample Scaling": sample_scaling_method,
+                "Timestamp": timestamp,
+                "Subsample Train Set": subsample_train_set,
                 **report_results,
             }
         )
 
     # After the loop, display as a table
     df_results = pd.DataFrame(results)
+
+    # Apply filters (positive - include only these values)
+    for col, filter_value in filters.items():
+        if filter_value is None:
+            continue
+        if col not in df_results.columns:
+            print(f"Warning: Filter column '{col}' not found in results. Skipping.")
+            continue
+        if isinstance(filter_value, str):
+            df_results = df_results[df_results[col] == filter_value]
+        elif isinstance(filter_value, list):
+            df_results = df_results[df_results[col].isin(filter_value)]
+    
+    # Apply exclude_filters (negative - exclude these values)
+    for col, filter_value in exclude_filters.items():
+        if filter_value is None:
+            continue
+        if col not in df_results.columns:
+            print(f"Warning: Exclude filter column '{col}' not found in results. Skipping.")
+            continue
+        if isinstance(filter_value, str):
+            df_results = df_results[df_results[col] != filter_value]
+        elif isinstance(filter_value, list):
+            df_results = df_results[~df_results[col].isin(filter_value)]
+    
+    if len(df_results) == 0:
+        print("No results match the specified filters.")
+        return []
+
+    # Keep only the most recent result for each configuration combination
+    config_columns = [
+        "Aggregator", "Dataset", "Features", "Label Name", "Model",
+        "Resampling", "Side", "Validation", "Channels", "Feature Scaling", "Sample Scaling", "Subsample Train Set"
+    ]
+    # Sort by timestamp descending and keep only the first (most recent) for each config
+    df_results = df_results.sort_values("Timestamp", ascending=False)
+    df_results = df_results.drop_duplicates(subset=config_columns, keep="first")
+    df_results = df_results.sort_values(config_columns)
     for (dataset, side, label_name, resampling), group in df_results.groupby(
         ["Dataset", "Side", "Label Name", "Resampling"]
     ):
@@ -170,7 +310,7 @@ def present_results(
             )
             grouped_data = (
                 group.sort_values(by=["Model", "Features", "Aggregator"])
-                .drop(columns=["Detailed Report"])
+                .drop(columns=["Detailed Report", "Timestamp"])
                 .drop_duplicates()
             )
             # display(grouped_data)
@@ -234,9 +374,11 @@ def present_results(
                     "Channels",
                     "Feature Scaling",
                     "Sample Scaling",
+                    "Subsample Train Set",
                 ]
             ).apply(mean_of_mean, include_groups=False)
             display(grouped_data)
+            grouped_data_return = grouped_data.copy()
             grouped_data = grouped_data.reset_index()
             grouped_data = grouped_data.drop(
                 columns=[
@@ -246,6 +388,7 @@ def present_results(
                     "Label Name",
                     "Resampling",
                     "Validation",
+                    "Subsample Train Set",
                 ]
             )
             grouped_data = grouped_data.rename(
@@ -294,7 +437,7 @@ def present_results(
             print(f"Error processing group {dataset}, {side}, {label_name}, {resampling}: {e}")
             continue
 
-    return results
+    return results, grouped_data_return
 
 
 def get_results_path(
@@ -306,7 +449,10 @@ def get_results_path(
     for result in results_paths:
         if not os.path.exists(result):
             raise ValueError(f"Results path {result} does not exist.")
+        # Match sweep paths: outputs/DATASET-SIDE/multirun_DATE/RUN_ID/reports.csv (4 levels)
         all_results += list(Path(result).glob("*/*/*/reports.csv"))
+        # Match single run paths: outputs/DATE/TIME/reports.csv (3 levels)
+        all_results += list(Path(result).glob("*/*/reports.csv"))
 
     if specific_path is not None:
         all_results = [val for val in all_results if specific_path in str(val)]

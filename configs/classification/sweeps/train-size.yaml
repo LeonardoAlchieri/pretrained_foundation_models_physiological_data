@@ -1,0 +1,30 @@
+defaults:
+  - _self_
+  - override /hydra/sweeper: list
+
+hydra:
+  mode: MULTIRUN
+  sweep:
+    dir: "outputs/${dataset.dataset}-${dataset.side}/multirun_${now:%Y-%m-%d}-${now:%H-%M-%S}"
+    # subdir: "${hydra:runtime.choices.model}-${hydra:runtime.choices.feature_extractor}-${hydra:runtime.choices.aggregator}-${hydra:runtime.choices.validation_method}-${label_name}-${seed}-${datamodule.channels}-${sample_scaling_method}"
+  sweeper:
+    grid_params: 
+      validation_method: tacv
+      engine.subsample_train_set: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, false
+    list_params:
+      aggregator: 
+      - none
+      - none
+      - none
+      - none
+      - none
+      - none
+      - mean_time
+      feature_extractor: 
+      - handcrafted
+      - handcrafted_baseline_small
+      - edamame_efficientnet
+      - edamame_efficientnet_random
+      - mantis
+      - moment_large
+      - chronos_small

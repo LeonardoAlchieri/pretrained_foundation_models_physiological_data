@@ -177,10 +177,10 @@ class EDADataset:
         if not self._check_and_load_from_cache():
             self.data = self.feature_extractor(self.data)
             self.data["features"] = self.feature_scaling_method.fit_transform(self.data["features"])
-            # np.save(
-            #     self.cache_path,
-            #     self.data,
-            # )
+            np.save(
+                self.cache_path,
+                self.data,
+            )
             self.extracted_features = True
 
         if not inplace:

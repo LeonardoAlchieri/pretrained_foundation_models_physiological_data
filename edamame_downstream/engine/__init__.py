@@ -15,6 +15,7 @@ from sklearn.base import BaseEstimator, clone
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
 from tqdm.auto import tqdm
 
 # import wandb
@@ -41,6 +42,7 @@ class Engine:
         scoring: partial,
         additional_metrics: list[partial],
         inner_cv_folds: int,
+        subsample_train_set: bool | float = False,
         resampling: BaseUnderSampler | None = None,
         trainable_feature_extractor: BaseEstimator | None = None,
         n_jobs: int = 10,
@@ -60,6 +62,7 @@ class Engine:
             else None
         )
         self.trainable_features_extractor_list = []
+        self.subsample_train_set = subsample_train_set
 
     def _trainable_feature_extraction_step_train(self, X_train: np.ndarray) -> np.ndarray:
         if self.trainable_feature_extractor is not None:
@@ -103,6 +106,13 @@ class Engine:
                     X_train, y_train = resampled[:2]
                 X_train = np.asarray(X_train)
                 y_train = np.asarray(y_train)
+                
+                # Subsample training set if specified (stratified to maintain label distribution)
+                if self.subsample_train_set:
+                    _, X_train, _, y_train = train_test_split(
+                        X_train, y_train, test_size=self.subsample_train_set, 
+                        stratify=y_train, random_state=42
+                    )
 
                 clf = GridSearchCV(
                     self.model,

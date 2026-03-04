@@ -1,7 +1,7 @@
 defaults:
   - _self_
-  - model: xgboost
-  - feature_extractor: handcrafted
+  - model: logistic_regression
+  - feature_extractor: edamame_efficientnet
   - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
@@ -10,7 +10,7 @@ defaults:
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
   - aggregator: none # accepted: mean_chan, mean_time or none
-  - dataset: usilaughs
+  - dataset: apsync
   - feature_scaling_method: standard_scaler
   - sample_scaling_method: none
   - label_processor: none
@@ -40,6 +40,7 @@ engine:
   inner_cv_folds: 3
   resampling: ${resampling}
   trainable_feature_extractor: ${trainable_feature_extractor}
+  subsample_train_set: false
   n_jobs: 2
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score

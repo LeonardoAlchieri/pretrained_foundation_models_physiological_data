@@ -165,8 +165,9 @@ class MantisExtractor:
         vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
         if self.aggregator != "None":
             # return an array of shape (batch_size, 1), where the value is 0
-            UserWarning("Mantis does not require a channel aggregator")
-            features = np.zeros((vals.shape[0], 1), dtype=np.float32)
+            # UserWarning("Mantis does not require a channel aggregator")
+            # features = np.zeros((vals.shape[0], 1), dtype=np.float32)
+            raise ValueError("Mantis does not require a channel aggregator")
         else:
             if not self.channel_together:
                 # NOTE: we are performing average pool across the time dimension (axis=1), which is standard practice with foundation models
