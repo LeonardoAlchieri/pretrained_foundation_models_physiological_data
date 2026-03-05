@@ -1,6 +1,6 @@
 defaults:
-  - default
-  - sweeps@_here_: basic
+  - default_bootstrap
+  - sweeps@_here_: basic-local
   - override dataset: usilaughs
   - override label_processor: none
   - _self_
