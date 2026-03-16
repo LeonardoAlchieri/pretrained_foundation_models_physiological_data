@@ -1,6 +1,7 @@
 *.nosync
 .DS_Store
 tables*
+.pixi
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -94,4 +95,6 @@ venv.bak/
 .DS_Store
 
 # Other
-*.log
+*.log# pixi environments
+.pixi/*
+!.pixi/config.toml
