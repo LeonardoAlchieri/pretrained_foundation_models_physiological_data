@@ -1,4 +1,5 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-# Configuration is in pyproject.toml
-setup()
+setup(
+    packages=find_packages(include=["edamame_downstream", "edamame_downstream.*"]),
+)
