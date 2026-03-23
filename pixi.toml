@@ -19,6 +19,8 @@ scipy = ">=1.17.1,<2"
 tqdm = ">=4.67.3,<5"
 sktime = ">=0.40.1,<0.41"
 numba = ">=0.64.0,<0.65"
+fvcore = ">=0.1.5.post20221221,<0.2"
+iopath = ">=0.1.10,<0.2"
 
 [pypi-dependencies]
 mantis-tsfm = ">=1.0.0, <2"
@@ -27,3 +29,5 @@ hydra-list-sweeper = ">=1.1.0, <2"
 imblearn = ">=0.0, <0.1"
 scikit-posthocs = ">=0.12.0, <0.13"
 jmetalpy = ">=1.9.0, <2"
+edamame = { path = "../eda-foundation-models/.", editable = true }
+momentfm = {git = "git+https://github.com/moment-timeseries-foundation-model/moment.git"}
