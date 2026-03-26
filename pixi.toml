@@ -21,6 +21,7 @@ sktime = ">=0.40.1,<0.41"
 numba = ">=0.64.0,<0.65"
 fvcore = ">=0.1.5.post20221221,<0.2"
 iopath = ">=0.1.10,<0.2"
+xgboost = ">=3.2.0,<4"
 
 [pypi-dependencies]
 mantis-tsfm = ">=1.0.0, <2"

@@ -15,7 +15,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from tqdm.auto import tqdm
 from tqdm.contrib.concurrent import process_map
 
-from edamame_downstream.data import EDADataset
+from edamame_downstream.data import EDAMAMEDataset
 from edamame_downstream.engine import Engine
 
 logger = getLogger(__name__)
@@ -169,7 +169,7 @@ class BootstrapEngine(Engine):
     # fit – Phase 1: preprocess & grid-search per fold
     #        Phase 2: for each bootstrap iter, resample & fit per fold
     # ------------------------------------------------------------------
-    def fit(self, datamodule: EDADataset):
+    def fit(self, datamodule: EDAMAMEDataset):
         """Find best hyper-parameters per fold, then train b_boot × n_folds
         bootstrap models."""
         self.models = []
@@ -296,7 +296,7 @@ class BootstrapEngine(Engine):
     # ------------------------------------------------------------------
     def test(
         self,
-        datamodule: EDADataset,
+        datamodule: EDAMAMEDataset,
         save: bool = True,
         lightning_logger: Logger | None = None,
     ) -> dict[int, dict]:

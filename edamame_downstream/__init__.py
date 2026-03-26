@@ -19,11 +19,11 @@ __version__ = "0.1.0"
 __author__ = "Leonardo Alchieri"
 __email__ = "leonardo.alchieri@usi.ch"
 
-from edamame_downstream.data import EDADataset
+from edamame_downstream.data import EDAMAMEDataset
 from edamame_downstream.engine import Engine
 
 __all__ = [
-    "EDADataset",
+    "EDAMAMEDataset",
     "Engine",
     "__version__",
 ]

@@ -1,7 +1,8 @@
 defaults:
   - default
-  - sweeps@_here_: basic
+  # - sweeps@_here_: basic
   - override dataset: hearts
+  # - override label_processor: extreme_only
   - override label_processor: label_binarizer
   - _self_
 
@@ -10,4 +11,5 @@ segment_length: 60
 device_map: "mps"
 
 # label_processor:
-#   threshold: 3 # TODO: check if correct
+#   lower_threshold: 2
+#   upper_threshold: 4

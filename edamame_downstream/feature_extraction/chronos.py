@@ -1,8 +1,6 @@
 import numpy as np
 import torch
-from edamame_downstream.utils.typing import DataInfo
 from chronos import ChronosPipeline
-from edamame_downstream.data import EDADataset
 from edamame_downstream.utils.config import check_aggregator
 
 from tqdm.auto import tqdm
@@ -102,21 +100,21 @@ class ChronosExtractor:
         # Concatenate all batch results
         return np.concatenate(all_embeddings, axis=0)
 
-    def __call__(self, data: DataInfo) -> EDADataset:
+    def __call__(self, arr: np.ndarray) -> np.ndarray:
         """
-        Extracts features from the EDA dataset.
+        Extracts features from an input EDA array.
 
         Parameters
         ----------
-        data : EDADataset
-            The dataset containing EDA signals.
+        arr : np.ndarray
+            Input EDA array.
 
         Returns
         -------
-        EDADataset
-            The dataset with extracted features.
+        np.ndarray
+            Extracted features.
         """
-        vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
+        vals: torch.tensor = torch.tensor(arr, dtype=torch.float32)
         if self.aggregator == "None":
             # return an array of shape (batch_size, 1), where the value is 0
             raise NotImplementedError("Aggregator 'None' is not implemented yet.")
@@ -140,6 +138,4 @@ class ChronosExtractor:
             #     axis=2,
             # )
         features = np.ma.masked_invalid(features, copy=False)
-        data["features"] = features.reshape(features.shape[0], -1)
-        data["feature_names"] = None
-        return data
+        return features.reshape(features.shape[0], -1)

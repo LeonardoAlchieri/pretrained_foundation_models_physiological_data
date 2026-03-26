@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: edamame_efficientnet
+  - feature_extractor: handcrafted_baseline_small
   - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
@@ -12,22 +12,45 @@ defaults:
   - aggregator: none # accepted: mean_chan, mean_time or none
   - dataset: apsync
   - feature_scaling_method: standard_scaler
-  - sample_scaling_method: none
+  - sample_scaling_method: min_max_scale
   - label_processor: none
   - trainable_feature_extractor: none
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 666
+label_name: none # e.g. sleep_quality for SleepQuality, or stress for Apsync
 
 datamodule:
-  _target_: edamame_downstream.data.EDADataset
-  path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
+  _target_: edamame_downstream.data.EDAMAMEDataset
+  path_to_data: ../datasets_cleaning/data_ready_multimodal.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.segment_length}s_multimodal.npz
   validation_method: ${validation_method}
-  feature_extractor: ${feature_extractor}
+  label_name: ${label_name}
+  signals: [ACC]
+  feature_extractors:
+    EDA: ${feature_extractor}
+    BVP: ${feature_extractor}
+    ACC: ${feature_extractor}
+    TEMP: ${feature_extractor}
   label_processor: ${dataset.label_processor}
-  feature_scaling_method: ${feature_scaling_method}
-  channels: [0, 1, 2] # 0 mixed, 1 phasic, 2 tonic
-  sample_scaling_method: ${sample_scaling_method}
+  feature_scaling_methods: 
+    EDA: ${feature_scaling_method}
+    BVP: ${feature_scaling_method}
+    ACC: ${feature_scaling_method}
+    TEMP: ${feature_scaling_method}
+  signal_kwargs:
+    EDA:
+      channels: [0, 1, 2]
+    BVP:
+      channels: [0]
+    ACC:
+      channels: [0, 1, 2]
+    TEMP:
+      channels: [0]
+  sample_scaling_methods: 
+    EDA: ${sample_scaling_method}
+    BVP: ${sample_scaling_method}
+    ACC: ${sample_scaling_method}
+    TEMP: ${sample_scaling_method}
   recompute_features: true
   debug: false # !!!!!!!!!!!! SET TO FALSE FOR PRODUCTION !!!!!!!!!!!!
 

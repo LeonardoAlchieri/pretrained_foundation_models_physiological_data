@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 from tqdm.auto import tqdm
 
 # import wandb
-from edamame_downstream.data import EDADataset
+from edamame_downstream.data import EDAMAMEDataset
 
 logger = getLogger(__name__)
 
@@ -80,7 +80,7 @@ class Engine:
             X_test = feature_extractor.transform(X_test)
         return X_test
 
-    def fit(self, datamodule: EDADataset):
+    def fit(self, datamodule: EDAMAMEDataset):
         self.models = []
         # self.fold_reports = {}
         with parallel_backend("threading", n_jobs=self.n_jobs):
@@ -134,7 +134,7 @@ class Engine:
                 )
 
     def test(
-        self, datamodule: EDADataset, save: bool = True, lightning_logger: Logger | None = None
+        self, datamodule: EDAMAMEDataset, save: bool = True, lightning_logger: Logger | None = None
     ) -> dict[int, dict]:
         all_accuracies = []
         all_reports: dict[str, list] = {metric.__name__: [] for metric in self.additional_metrics}
@@ -174,7 +174,7 @@ class Engine:
             for metric, values in all_reports.items()
         }
         for metric, (mean, sem_value) in mean_reports.items():
-            logger.info(f"{metric}: {mean*100:.2f} ± {sem_value*100:.2f} %")
+            logger.info(f"{metric}: {mean*100:.2f}_{{{sem_value*100:.2f}}} %")
             if lightning_logger is not None:
                 lightning_logger.log_metrics({
                     f"{datamodule.name}/{metric}": mean * 100,

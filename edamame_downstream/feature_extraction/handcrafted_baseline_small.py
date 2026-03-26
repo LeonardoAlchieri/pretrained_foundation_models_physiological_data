@@ -27,9 +27,6 @@ from scipy.stats import linregress
 from scipy.fft import fft
 from tqdm.contrib.concurrent import process_map
 
-from edamame_downstream.data import EDADataset
-from edamame_downstream.utils.typing import DataInfo
-
 logger = getLogger(__name__)
 
 EDA_FEATURE_NAMES: list[str] = [
@@ -100,29 +97,27 @@ class HandcraftedFeatureExtractor:
             "sampling_rate": self.sampling_rate,
         }
 
-    def __call__(self, data: DataInfo) -> EDADataset:
+    def __call__(self, arr: ndarray) -> ndarray:
         """
-        Extracts features from the EDA dataset.
+        Extracts features from an input EDA array.
 
         Parameters
         ----------
-        data : EDADataset
-            The dataset containing EDA signals.
+        arr : ndarray
+            Input EDA array.
 
         Returns
         -------
-        EDADataset
-            The dataset with extracted features.
+        ndarray
+            Extracted features.
         """
 
         logger.info("Extracting handcrafted features from EDA signals.")
         features = handcrafted_eda_features(
-            data["values"],
+            arr,
             max_workers=self.max_workers,
             chunksize=self.chunksize,
             sampling_rate=self.sampling_rate,
         )
         features = masked_invalid(features, copy=False)
-        data["features"] = features.reshape(features.shape[0], -1)
-        data["feature_names"] = EDA_FEATURE_NAMES
-        return data
+        return features.reshape(features.shape[0], -1)

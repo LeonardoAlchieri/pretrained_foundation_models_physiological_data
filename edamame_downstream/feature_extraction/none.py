@@ -1,9 +1,7 @@
 from logging import getLogger
+import numpy as np
 
 from numpy.ma import masked_invalid
-
-from edamame_downstream.data import EDADataset
-from edamame_downstream.utils.typing import DataInfo
 
 
 logger = getLogger(__name__)
@@ -34,28 +32,26 @@ class NoneFeatureExtractor:
             "name": self.__class__.__name__,
         }
 
-    def __call__(self, data: DataInfo) -> DataInfo:
+    def __call__(self, arr: np.ndarray) -> np.ndarray:
         """
-        Extracts features from the EDA dataset.
+        Extracts features from an input EDA array.
 
         Parameters
         ----------
-        data : EDADataset
-            The dataset containing EDA signals.
+        arr : np.ndarray
+            Input EDA array.
 
         Returns
         -------
-        EDADataset
-            The dataset with extracted features.
+        np.ndarray
+            Extracted features.
         """
 
         logger.info("Extracting handcrafted features from EDA signals.")
-        features = data["values"]
+        features = arr
         features = masked_invalid(features, copy=False)
         if self.channel is not None:
             features = features[..., self.channel]
         if not self.preserve_shape:
             features = features.reshape(features.shape[0], -1)
-        data["features"] = features
-        data["feature_names"] = None
-        return data
+        return features

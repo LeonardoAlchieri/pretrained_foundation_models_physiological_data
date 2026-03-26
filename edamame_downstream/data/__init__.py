@@ -4,7 +4,7 @@ from logging import getLogger
 from pathlib import Path
 from pprint import pprint
 from random import sample
-from typing import Optional, Callable
+from typing import Callable
 
 import numpy as np
 from sklearn.base import TransformerMixin
@@ -13,8 +13,10 @@ from edamame_downstream.utils.typing import DataInfo
 
 logger = getLogger(__name__)
 
+ACCEPTED_SIGNAL_KWARGS = ["channels"]
 
-class EDADataset:
+
+class EDAMAMEDataset:
     """
     A class representing the USI Laughs dataset.
     """
@@ -22,14 +24,16 @@ class EDADataset:
     def __init__(
         self,
         path_to_data: str,
+        signals: list[str],
+        label_name: str,
         validation_method: object,
-        feature_extractor: object | None,
+        feature_extractors: dict[str, object],
+        feature_scaling_methods: dict[str, TransformerMixin],
+        sample_scaling_methods: dict[str, Callable],
         label_processor: TransformerMixin,
-        feature_scaling_method: TransformerMixin,
         name: str | None = None,
-        sample_scaling_method: Callable | None = None,
         recompute_features: bool = False,
-        channels: Optional[list[int] | int] = None,
+        signal_kwargs: dict | None = None,
         debug: bool = False,
     ):
         """
@@ -39,75 +43,112 @@ class EDADataset:
         """
         self.name = name
         self.path_to_data = path_to_data
+        self.label_name = label_name
         self.label_processor = label_processor
+        self.signals = signals
+        self.signal_kwargs = self._check_signal_kwargs(signals, signal_kwargs or {})
 
-        self.sample_scaling_method = sample_scaling_method
-        self.feature_scaling_method = feature_scaling_method
+        self.sample_scaling_methods = sample_scaling_methods
+        self.feature_scaling_methods = feature_scaling_methods
 
-        if isinstance(channels, int):
-            channels = [channels]
-        self.data = self._load_data(path_to_data, channels=list(channels))
+        self.data = self._load_data(path_to_data)
         self.validation_method = validation_method
         self.extracted_features: bool = False
-        self.feature_extractor = feature_extractor
-        if feature_extractor is not None:
-            self.cache_path = self._get_cache_path()
+        self.feature_extractors = feature_extractors
+
+        if len(feature_extractors) > 0:
+            self.cache_paths = self._get_cache_path()
         else:
-            logger.info("No feature extractor provided. Please, use set_feature_extractor().")
+            logger.info(
+                "No feature extractors provided. Please, use set_feature_extractors()."
+            )
 
         self.recompute_features = recompute_features
         self.debug = debug
 
-    def set_feature_extractor(self, feature_extractor: object):
+    @staticmethod
+    def _check_signal_kwargs(signals: list[str], signal_kwargs: dict) -> dict:
+        for signal in signals:
+            if signal not in signal_kwargs.keys():
+                raise ValueError(
+                    f"Missing kwargs for signal {signal} in signal_kwargs."
+                )
+            if (
+                signal_kwargs[signal] is None
+                or set(signal_kwargs[signal].keys()) != set(ACCEPTED_SIGNAL_KWARGS)
+            ):
+                raise ValueError(
+                    f"""Invalid kwargs for signal {signal} in signal_kwargs. 
+                    Expected keys: {ACCEPTED_SIGNAL_KWARGS}. 
+                    Received: {signal_kwargs[signal].keys() if signal_kwargs[signal] is not None else None}"""
+                )
+        return signal_kwargs
+
+    def set_feature_extractors(self, feature_extractors: dict[str, object]):
         """
         Set the feature extractor for the dataset.
         """
-        self.feature_extractor = feature_extractor
-        self.cache_path = self._get_cache_path()
+        if feature_extractors is None or len(feature_extractors) == 0:
+            raise ValueError("Feature extractors cannot be None or empty.")
+        self.feature_extractors = feature_extractors
+        self.cache_paths = self._get_cache_path()
 
-    def _get_cache_path(self) -> str:
+    def _get_cache_path(self) -> dict[str, str]:
         """
         Get the cache path based on the data file and feature extractor hash.
         """
         os.makedirs(Path(self.path_to_data).parent / ".cache", exist_ok=True)
 
-        # Create a hash of the feature_extractor
-        feature_extractor_dict = self.feature_extractor.to_dict()
-        # TODO: this is ugly, we need to find a way to fix it
-        label_processor_dict = vars(self.label_processor)
-        label_processor_dict["name"] = self.label_processor.__class__.__name__
-        print("Feature extractor dict:")
-        # Print the feature extractor dict in light blue
-        print("\033[94m")  # Light blue ANSI escape code
-        pprint(feature_extractor_dict, indent=2, width=80, compact=False)
-        print("\033[0m")  # Reset color
+        paths: dict[str, str] = {}
+        for signal in self.signals:
+            if signal not in self.feature_extractors:
+                raise ValueError(
+                    f"""Missing feature extractor for signal {signal} in feature_extractors. 
+                    Received keys: {self.feature_extractors.keys()}"""
+                )
+            os.makedirs(Path(self.path_to_data).parent / ".cache" / signal, exist_ok=True)
+            feature_extractor_dict = self.feature_extractors[signal].to_dict()
+            # TODO: this is ugly, we need to find a way to fix it
+            label_processor_dict = dict(getattr(self.label_processor, "__dict__", {}))
+            label_processor_dict["name"] = self.label_processor.__class__.__name__
+            print("Feature extractor dict:")
+            # Print the feature extractor dict in light blue
+            print("\033[94m")  # Light blue ANSI escape code
+            pprint(feature_extractor_dict, indent=2, width=80, compact=False)
+            print("\033[0m")  # Reset color
 
-        feature_extractor_str = str(feature_extractor_dict)
-        label_processor_str = str(label_processor_dict)
+            feature_extractor_str = str(feature_extractor_dict)
+            label_processor_str = str(label_processor_dict)
 
-        feature_scaling_method_str = str(vars(self.feature_scaling_method))
-        sample_scaling_method_str = (
-            str(vars(self.sample_scaling_method))
-            if self.sample_scaling_method is not None
-            else "None"
-        )
+            feature_scaling_method_str = str(vars(self.feature_scaling_methods[signal]))
+            sample_scaling_method_str = (
+                str(vars(self.sample_scaling_methods[signal]))
+                if signal in self.sample_scaling_methods
+                and self.sample_scaling_methods[signal] is not None
+                else "None"
+            )
 
-        feature_hash = hashlib.md5(
-            (
-                feature_extractor_str
-                + label_processor_str
-                + self.path_to_data
-                + feature_scaling_method_str
-                + sample_scaling_method_str
-            ).encode()
-        ).hexdigest()
+            feature_hash = hashlib.md5(
+                (
+                    signal
+                    + feature_extractor_str
+                    + label_processor_str
+                    + self.path_to_data
+                    + feature_scaling_method_str
+                    + sample_scaling_method_str
+                ).encode()
+            ).hexdigest()
 
-        print(f"\033[94mFeature extractor hash: {feature_hash}\033[0m")
+            print(
+                f"\033[94mFeature extractor hash for signal {signal}: {feature_hash}\033[0m"
+            )
 
-        # Combine data file stem with feature extractor hash
-        cache_filename = f"{str(Path(self.path_to_data).stem)}_{feature_hash}.npy"
-
-        return str(Path(self.path_to_data).parent / ".cache" / cache_filename)
+            # Combine data file stem with feature extractor hash
+            cache_filename = f"{str(Path(self.path_to_data).stem)}_{feature_hash}.npy"
+            paths[signal] = str(
+                Path(self.path_to_data).parent / ".cache" / signal / cache_filename
+            )
+        return paths
 
     @staticmethod
     def remove_masked_labels(data: DataInfo) -> DataInfo:
@@ -124,64 +165,118 @@ class EDADataset:
             # data["labels"] = data["labels"].data[mask]  # convert to regular ndarray
         return data
 
-    def _load_data(self, path: str, channels: Optional[list[int]] = None) -> DataInfo:
+    def _prepare_labels(self, data: DataInfo) -> DataInfo:
+        if self.label_name not in data:
+            raise ValueError(
+                f"Label {self.label_name} not found in the data. Available keys: {data.keys()}"
+            )
+
+        labels = np.asarray(data[self.label_name])
+        if np.issubdtype(labels.dtype, np.number):
+            labels = labels.astype(np.float32)
+
+        data["labels"] = self.label_processor.fit_transform(labels.reshape(-1, 1)).reshape(
+            -1
+        )
+        data = self.remove_masked_labels(data)
+        data["labels"] = data["labels"].astype(np.int32)
+        return data
+
+    def _prepare_signals(self, data: DataInfo) -> DataInfo:
+        for signal in self.signals:
+            if signal not in data:
+                raise ValueError(
+                    f"Signal {signal} not found in the data. Available keys: {data.keys()}"
+                )
+            signal_channels = self.signal_kwargs[signal]["channels"]
+            data[signal] = data[signal][..., signal_channels]
+
+        if (
+            len(
+                {data["labels"].shape[0]}
+                | {data[signal].shape[0] for signal in self.signals}
+            )
+            != 1
+        ):
+            raise ValueError(
+                f"""Signal and labels sample dimensions do not match.\n
+                Received shapes: labels={data['labels'].shape}, """
+                + ", ".join(f"{signal}={data[signal].shape}" for signal in self.signals)
+                + f", label processor: {self.label_processor.__class__.__name__}"
+            )
+
+        return data
+
+    def _apply_sample_scaling(self, data: DataInfo) -> DataInfo:
+        for signal in self.signals:
+            if signal not in self.sample_scaling_methods:
+                raise ValueError(
+                    f"Missing sample scaling method for signal {signal} in sample_scaling_methods."
+                )
+            else:
+                data[signal] = self.sample_scaling_methods[signal](
+                    data[signal], data["groups"]
+                )
+        return data
+
+    def _load_data(self, path: str) -> DataInfo:
         """
         Load the dataset.
         This method should be implemented to load the actual dataset.
         """
         loaded_data = dict(np.load(path, allow_pickle=True))
-        
-        try:
-            loaded_data["labels"] = loaded_data["labels"].astype(np.float32)
-        except (ValueError, TypeError):
-            pass  # keep original type if conversion fails
-        loaded_data["labels"] = (self.label_processor.fit_transform(loaded_data["labels"].reshape(-1, 1)).reshape(-1))
-        loaded_data = self.remove_masked_labels(loaded_data)
-        loaded_data["labels"] = loaded_data["labels"].astype(np.int32)
 
-        if loaded_data["labels"].shape[0] != loaded_data["values"].shape[0]:
-            # TODO: add more info to the error (e.g. shapes and label_processor name)
-            raise ValueError(
-                f"""Labels shape got messed up when using the label processor. Are you sure you used the correct one?\n
-                Received labels shape: {loaded_data["labels"].shape}, values shape: {loaded_data["values"].shape}, label processor: {self.label_processor.__class__.__name__}"""
+        loaded_data = self._prepare_labels(loaded_data)
+        loaded_data = self._prepare_signals(loaded_data)
+
+        loaded_data = self._apply_sample_scaling(loaded_data)
+
+        logger.info(
+            f"Data shape after loading: "
+            + ", ".join(
+                f"{signal}={loaded_data[signal].shape}" for signal in self.signals
             )
-
-        if channels is not None:
-            loaded_data["values"] = loaded_data["values"][..., channels]
-
-        if self.sample_scaling_method is not None:
-            loaded_data["values"] = self.sample_scaling_method(
-                loaded_data["values"], loaded_data["groups"]
-            )
-
-        logger.info(f"Data shape after loading: {loaded_data['values'].shape}")
+        )
 
         return loaded_data
 
-    def _check_and_load_from_cache(self):
+    def _check_and_load_from_cache(self, signal: str):
 
-        if (Path(self.cache_path).exists()) and (not self.recompute_features):
-            logger.info(f"Loading cached features from {self.cache_path}")
-            self.data: dict[str, np.ndarray] = np.load(self.cache_path, allow_pickle=True).item()
+        cache_path = Path(self.cache_paths[signal])
+
+        if cache_path.exists() and (not self.recompute_features):
+            logger.info(f"Loading cached features from {cache_path}")
+            self.data: dict[str, np.ndarray] = np.load(
+                cache_path, allow_pickle=True
+            ).item()
             self.extracted_features = True
 
             return True
         else:
-            logger.info(f"No cached features found at {self.cache_path}. Computing...")
+            logger.info(f"No cached features found at {cache_path}. Computing...")
             return False
 
     def extract_features(self, inplace: bool = False):
         """
         Extract features from the dataset using the provided feature extractor.
         """
-        if not self._check_and_load_from_cache():
-            self.data = self.feature_extractor(self.data)
-            self.data["features"] = self.feature_scaling_method.fit_transform(self.data["features"])
-            # np.save(
-            #     self.cache_path,
-            #     self.data,
-            # )
+        for signal in self.signals:
+            if not self._check_and_load_from_cache(signal):
+                self.data[f'features_{signal}'] = self.feature_extractors[signal](
+                    self.data[signal]
+                )
+                self.data[f"features_{signal}"] = self.feature_scaling_methods[
+                    signal
+                ].fit_transform(self.data[f"features_{signal}"])
+                np.save(
+                    self.cache_paths[signal],
+                    self.data,
+                )
             self.extracted_features = True
+
+        self.data["features"] = np.concatenate(
+            [self.data[f"features_{signal}"] for signal in self.signals], axis=1
+        )
 
         if not inplace:
             return self
@@ -197,14 +292,19 @@ class EDADataset:
                         random_indices = np.random.choice(
                             original_size, size=reduced_size, replace=False
                         )
+                        first_iteration = False
                     self.data[key] = self.data[key][random_indices]
         logger.info(
-            f"Reduced dataset size for debugging. Original size: {original_size}, Reduced size: {reduced_size}"
+            f"""
+            Reduced dataset size for debugging. Original size: {original_size}, 
+            Reduced size: {reduced_size}"""
         )
 
     def train_test_split(self, inplace: bool = False):
         if not self.extracted_features:
-            raise RuntimeError("Features must be extracted before splitting the dataset.")
+            raise RuntimeError(
+                "Features must be extracted before splitting the dataset."
+            )
         if self.debug:
             self._reduce_size_for_debugging()
 

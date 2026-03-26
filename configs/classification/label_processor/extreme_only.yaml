@@ -1,4 +1,4 @@
 _target_: edamame_downstream.label_processor.extreme_only.ExtremeOnlyLabelProcessor
-lower_threshold: ${dataset.lower_threshold}
-upper_threshold: ${dataset.upper_threshold}
+lower_threshold: null
+upper_threshold: null
 threshold_type: value

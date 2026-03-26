@@ -45,12 +45,12 @@ class MiniRocket(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        data : EDADataset
+        data : EDAMAMEDataset
             The dataset containing EDA signals.
 
         Returns
         -------
-        EDADataset
+        EDAMAMEDataset
             The dataset with extracted MiniRocket features.
         """
         if self.verbose:

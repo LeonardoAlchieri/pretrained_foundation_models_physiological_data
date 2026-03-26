@@ -264,7 +264,7 @@ class NewModelExtractor:
     def __init__(self, model_name: str, **kwargs):
         self.model = load_model(model_name)
     
-    def __call__(self, data: DataInfo) -> EDADataset:
+    def __call__(self, data: DataInfo) -> EDAMAMEDataset:
         # Extract features using your model
         features = self.model.encode(data["values"])
         data["features"] = features

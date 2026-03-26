@@ -1,8 +1,6 @@
 import numpy as np
 import torch
-from edamame_downstream.utils.typing import DataInfo
 from momentfm import MOMENTPipeline
-from edamame_downstream.data import EDADataset
 from edamame_downstream.utils.config import check_aggregator
 from torch.utils.data import DataLoader
 
@@ -116,21 +114,21 @@ class MOMENTExtractor:
 
         return np.concatenate(all_embeddings, axis=0)
 
-    def __call__(self, data: DataInfo) -> EDADataset:
+    def __call__(self, arr: np.ndarray) -> np.ndarray:
         """
-        Extracts features from the EDA dataset.
+        Extracts features from an input EDA array.
 
         Parameters
         ----------
-        data : EDADataset
-            The dataset containing EDA signals.
+        arr : np.ndarray
+            Input EDA array.
 
         Returns
         -------
-        EDADataset
-            The dataset with extracted features.
+        np.ndarray
+            Extracted features.
         """
-        vals: torch.tensor = torch.tensor(data["values"], dtype=torch.float32)
+        vals: torch.tensor = torch.tensor(arr, dtype=torch.float32)
         vals = torch.permute(vals, (0, 2, 1))
 
         if self.aggregator == "None":
@@ -145,6 +143,4 @@ class MOMENTExtractor:
             features: np.ndarray = self.aggregator(channel_features)
 
         features = np.ma.masked_invalid(features, copy=False)
-        data["features"] = features.reshape(features.shape[0], -1)
-        data["feature_names"] = None
-        return data
+        return features.reshape(features.shape[0], -1)

@@ -13,16 +13,39 @@ defaults:
 
 sampling_rate: ${dataset.sampling_rate}
 seed: 666
+label_name: ${dataset.label_name}
 
 datamodule:
-  _target_: edamame_downstream.data.EDADataset
+  _target_: edamame_downstream.data.EDAMAMEDataset
   path_to_data: ${oc.env:DATA_PATH,./data.nosync/${dataset.dataset}/data_${dataset.side}_${dataset.label_name}_${dataset.segment_length}s.npz}
   validation_method: ${validation_method}
-  feature_extractor: ${feature_extractor}
+  label_name: ${label_name}
+  signals: [EDA, BVP, ACC, ST]
+  feature_extractors:
+    EDA: ${feature_extractor}
+    BVP: ${feature_extractor}
+    ACC: ${feature_extractor}
+    ST: ${feature_extractor}
   label_processor: ${dataset.label_processor}
-  feature_scaling_method: ${feature_scaling_method}
-  channels: [0, 1, 2] # 0 mixed, 1 phasic, 2 tonic
-  sample_scaling_method: ${sample_scaling_method}
+  feature_scaling_methods:
+    EDA: ${feature_scaling_method}
+    BVP: ${feature_scaling_method}
+    ACC: ${feature_scaling_method}
+    ST: ${feature_scaling_method}
+  signal_kwargs:
+    EDA:
+      channels: [0, 1, 2]
+    BVP:
+      channels: [0]
+    ACC:
+      channels: [0, 1, 2]
+    ST:
+      channels: [0]
+  sample_scaling_methods:
+    EDA: ${sample_scaling_method}
+    BVP: ${sample_scaling_method}
+    ACC: ${sample_scaling_method}
+    ST: ${sample_scaling_method}
   recompute_features: true
   debug: false
 
