@@ -52,6 +52,7 @@ class EdamameExtractor:
                 normalization_fn=normalization_fn,
                 model_config={},
             )
+        print(self.pipeline.model)
         self.aggregator = check_aggregator(aggregator)
         self.batch_size = batch_size
 

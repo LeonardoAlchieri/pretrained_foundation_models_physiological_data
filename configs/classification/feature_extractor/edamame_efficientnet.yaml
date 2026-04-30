@@ -1,6 +1,7 @@
 _target_: edamame_downstream.feature_extraction.edamame.EdamameExtractor
 model_name: "efficientnet"
-checkpoint_path: /Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/checkpoints.nosync/final_models/best-noscale.ckpt
+# checkpoint_path: /Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/checkpoints.nosync/final_models/best-noscale.ckpt
+checkpoint_path: /Users/leonardoalchieri/Library/Mobile Documents/com~apple~CloudDocs/Downloads/model.ckpt
 # checkpoint_path: /Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/checkpoints.nosync/final_models/best-minmax-traincrash.ckpt
 # checkpoint_path: "/Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/checkpoints.nosync/74-3.0120.ckpt"
 # checkpoint_path: "/Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/checkpoints.nosync/30-4.5856.ckpt"

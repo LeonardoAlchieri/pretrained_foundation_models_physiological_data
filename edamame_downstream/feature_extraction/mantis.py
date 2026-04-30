@@ -1,4 +1,5 @@
 from typing import Callable
+from pathlib import Path
 import numpy as np
 import torch
 from edamame_downstream.utils.typing import DataInfo
@@ -31,7 +32,26 @@ class MantisExtractor:
         self.device_map = device_map
         self.torch_dtype = torch_dtype
         network = Mantis8M(device=device_map)
-        self.network = network.from_pretrained(model_name)
+        local_model_path = Path(model_name).expanduser()
+        if local_model_path.is_file():
+            try:
+                checkpoint = torch.load(
+                    local_model_path,
+                    map_location="cpu",
+                    weights_only=False,
+                )
+            except TypeError:
+                checkpoint = torch.load(local_model_path, map_location="cpu")
+            state_dict = checkpoint.get("state_dict", checkpoint) if isinstance(checkpoint, dict) else checkpoint
+            if not isinstance(state_dict, dict):
+                raise ValueError(f"Unsupported checkpoint format at: {local_model_path}")
+            state_dict = {
+                (k[7:] if k.startswith("module.") else k): v for k, v in state_dict.items()
+            }
+            network.load_state_dict(state_dict, strict=False)
+            self.network = network
+        else:
+            self.network = network.from_pretrained(model_name)
         # network.seq_len
         self.pipeline = MantisTrainer(device=device_map, network=self.network)
         self.aggregator = check_aggregator(aggregator)
