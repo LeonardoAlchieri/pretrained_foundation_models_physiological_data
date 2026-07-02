@@ -1,0 +1,20 @@
+# Mantis used as an end-to-end, fine-tunable classifier (NOT as a feature extractor).
+#
+# IMPORTANT: this model consumes the raw signal, so it must be paired with the
+# `none` feature extractor flattening to 2D. Run e.g.:
+#   python classification.py model=mantis feature_extractor=none-flat aggregator=none
+# where `none-flat` uses NoneFeatureExtractor(preserve_shape=false) so the input
+# arrives as (n_samples, seq_len * n_channels) and is reshaped internally.
+model:
+  _target_: edamame_downstream.model.mantis.MantisClassifier
+  model_name: "paris-noah/Mantis-8M"
+  n_channels: 3 # must match len(datamodule.channels)
+  device: ${device_map}
+  fine_tuning_type: full
+  num_epochs: 100
+  batch_size: 256
+  base_learning_rate: 2e-4
+param_grid:
+  fine_tuning_type: ["full", "head"]
+  base_learning_rate: [2e-4, 1e-3]
+  num_epochs: [50, 100]
