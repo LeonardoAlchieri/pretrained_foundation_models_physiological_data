@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: train-size
+  # - sweeps@_here_: train-size
   - override dataset: apsync
   - override label_processor: label_binarizer
   - _self_

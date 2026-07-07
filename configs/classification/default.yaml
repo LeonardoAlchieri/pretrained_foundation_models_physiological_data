@@ -1,7 +1,7 @@
 defaults:
   - _self_
-  - model: logistic_regression
-  - feature_extractor: edamame_efficientnet-userpair
+  - model: mantis
+  - feature_extractor: none
   - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
@@ -11,7 +11,7 @@ defaults:
   # just wrote down "None" in the code
   - aggregator: none # accepted: mean_chan, mean_time or none
   - dataset: apsync
-  - feature_scaling_method: standard_scaler
+  - feature_scaling_method: none
   - sample_scaling_method: none
   - label_processor: none
   - trainable_feature_extractor: none

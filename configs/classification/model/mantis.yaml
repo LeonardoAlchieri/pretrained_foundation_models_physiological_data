@@ -11,10 +11,10 @@ model:
   n_channels: 3 # must match len(datamodule.channels)
   device: ${device_map}
   fine_tuning_type: full
-  num_epochs: 100
-  batch_size: 256
+  num_epochs: 10
+  batch_size: 32
   base_learning_rate: 2e-4
 param_grid:
-  fine_tuning_type: ["full", "head"]
-  base_learning_rate: [2e-4, 1e-3]
-  num_epochs: [50, 100]
+  fine_tuning_type: ["full"]
+  base_learning_rate: [2e-4]
+  num_epochs: [50]

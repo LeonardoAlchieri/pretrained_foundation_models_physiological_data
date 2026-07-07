@@ -1,0 +1,6 @@
+_target_: edamame_downstream.feature_extraction.mantis.MantisExtractor
+model_name: "artifacts.nosync/mantis-finetune-samplepair-EPOCH0.ckpt"
+device_map: ${device_map}
+torch_dtype: "auto"
+aggregator: ${aggregator}
+batch_size: 128

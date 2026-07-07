@@ -185,13 +185,16 @@ class MantisClassifier(BaseEstimator, ClassifierMixin):
         # Encode arbitrary label values to the [0, n_classes - 1] range Mantis expects.
         self._label_encoder = LabelEncoder().fit(y_checked)
         self.classes_ = self._label_encoder.classes_
-        y_encoded = self._label_encoder.transform(y_checked)
+        y_encoded = torch.tensor(
+            self._label_encoder.transform(y_checked), dtype=torch.long
+        )
 
         network = self._load_network()
         self._seq_len = network.seq_len
         self._trainer = MantisTrainer(device=self.device, network=network)
 
         x_tensor = self._prepare_x(X_checked)
+        
         self._trainer.fit(
             x_tensor,
             y_encoded,

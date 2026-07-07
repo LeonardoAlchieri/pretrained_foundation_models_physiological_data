@@ -11,14 +11,16 @@
 model:
   _target_: edamame_downstream.model.ume.UMEClassifier
   model_name: "efficientnet"
-  weights_path: ./ume_weights.nosync/user-pair-base-2.ckpt
+  weights_path: "/Users/leonardoalchieri/Desktop/GIT-Mine/eda-foundation-models/artifacts/ume.ckpt"
   n_channels: 3 # must match len(datamodule.channels)
   device: ${device_map}
   fine_tuning_type: full
-  learning_rate: 1e-3
-  batch_size: 64
-  num_epochs: 100
+  learning_rate: 1e-4
+  batch_size: 16
+  num_epochs: 10
+  verbose: 1
 param_grid:
-  fine_tuning_type: ["full", "head"]
-  learning_rate: [1e-3, 1e-4]
-  num_epochs: [50, 100]
+  fine_tuning_type: ["full"]
+  # batch_size: [2, 4, 16, 32]
+  # learning_rate: [1e-3, 1e-4, 1e-5]
+  # num_epochs: [3, 5, 10]

@@ -1,0 +1,6 @@
+# Pass-through "feature extractor" that flattens the raw signal to 2D
+# (n_samples, seq_len * n_channels). Use this when the model itself consumes the
+# raw signal (e.g. `model=mantis`, where Mantis is fine-tuned end-to-end).
+_target_: edamame_downstream.feature_extraction.none.NoneFeatureExtractor
+channel: null
+preserve_shape: false

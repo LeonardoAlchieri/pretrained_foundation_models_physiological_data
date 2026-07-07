@@ -1,16 +1,20 @@
 defaults:
   - default
   # - sweeps@_here_: basic-local
-  - override dataset: usilaughs
-  - override label_processor: none
+  - override dataset: edabe
+  - override label_processor: custom_selector
   - _self_
 
-label_name: cognitiveload # accepted: cognitiveload
-dataset.side: right # accepted: right, left
+label_name: artifact # accepted: cognitiveload
+dataset.side: unknown # accepted: right, left
 segment_length: 60 # in seconds
 device_map: "mps" # accepted: "cpu", "cuda", "mps"
 # FIXME: device_map is not working
 # NOTE: edamame does not support mps. I need to fix it.
+
+label_processor:
+  positive_class: [1, 2]
+  negative_class: [0]
 
 datamodule:
   recompute_features: true

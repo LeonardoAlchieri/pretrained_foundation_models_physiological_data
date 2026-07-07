@@ -181,6 +181,7 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
             weight_decay=self.weight_decay,
             class_weight=self.class_weight,
             verbose=self.verbose,
+            validation_split=0.2,
         )
         self.classes_ = np.asarray(self._pipeline.classes_)
         return self
