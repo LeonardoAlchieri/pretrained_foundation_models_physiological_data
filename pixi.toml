@@ -26,9 +26,14 @@ fsspec = "<=2026.4.0"
 
 [target.osx-arm64.dependencies]
 pytorch = ">=2.6.0,<3"
+torchvision = ">=0.21.0,<0.22"
 
 [target.linux-64.dependencies]
 pytorch-gpu = ">=2.6.0,<3"
+# Pull torchvision from conda-forge (not PyPI) so the solver builds it against
+# the same CUDA toolchain as pytorch-gpu. A PyPI torchvision wheel ships cu13
+# and mismatches conda-forge's cu12 pytorch.
+torchvision = ">=0.21.0,<0.22"
 
 # Declare CUDA so pytorch-gpu resolves for the linux-64 target even when the
 # lock is solved from a non-CUDA host (e.g. macOS). Harmless on osx-arm64,
