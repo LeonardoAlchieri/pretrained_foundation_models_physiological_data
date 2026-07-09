@@ -1,0 +1,25 @@
+# NOTE: DOES NOT WORK: all possible label combinations are not better than random baseline
+defaults:
+  - default
+  # - sweeps@_here_: basic-local
+  - override dataset: amigos
+  - override label_processor: extreme_only
+  - _self_
+
+label_name: Liking # accepted: Arousal, Dominance, Emotion, Liking, Valence
+dataset.side: shimmer # accepted: shimmer, empatica -> used to identify the device here!
+segment_length: 60 # in seconds
+device_map: "mps" # accepted: "cpu", "cuda", "mps"
+# FIXME: device_map is not working
+# NOTE: edamame does not support mps. I need to fix it.
+
+label_processor:
+  lower_threshold: 0.25
+  upper_threshold: 0.75
+
+datamodule:
+  recompute_features: true
+#   channels: [1, 2] # 0 mixed, 1 phasic, 2 tonic
+#   sample_scaling_method: 
+#     _target_: edamame.utils.sample_scaling.min_max_scaling
+#     _partial_: true
