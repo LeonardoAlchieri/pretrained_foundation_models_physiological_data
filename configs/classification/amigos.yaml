@@ -6,7 +6,7 @@ defaults:
   - override label_processor: extreme_only
   - _self_
 
-label_name: Liking # accepted: Arousal, Dominance, Emotion, Liking, Valence
+label_name: Arousal # accepted: Arousal, Dominance, Emotion, Liking, Valence
 dataset.side: shimmer # accepted: shimmer, empatica -> used to identify the device here!
 segment_length: 60 # in seconds
 device_map: "mps" # accepted: "cpu", "cuda", "mps"

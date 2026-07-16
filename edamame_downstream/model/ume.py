@@ -94,7 +94,11 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
         batch_size: int = 64,
         num_epochs: int = 100,
         weight_decay: float = 0.0,
+        use_layer_norm: bool = True,
         class_weight: Optional[Any] = None,
+        early_stopping: bool = False,
+        patience: int = 3,
+        monitor: str = "val_macro_f1",
         verbose: bool = False,
     ) -> None:
         self.weights_path = weights_path
@@ -111,6 +115,10 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
         self.weight_decay = weight_decay
         self.class_weight = class_weight
         self.verbose = verbose
+        self.use_layer_norm = use_layer_norm
+        self.early_stopping = early_stopping
+        self.patience = patience
+        self.monitor = monitor
 
     def to_dict(self) -> dict:
         """Return a serialisable description of the estimator configuration."""
@@ -180,8 +188,12 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
             num_epochs=self.num_epochs,
             weight_decay=self.weight_decay,
             class_weight=self.class_weight,
+            use_layer_norm=self.use_layer_norm,
             verbose=self.verbose,
             validation_split=0.2,
+            early_stopping=self.early_stopping,
+            patience=self.patience,
+            monitor=self.monitor
         )
         self.classes_ = np.asarray(self._pipeline.classes_)
         return self

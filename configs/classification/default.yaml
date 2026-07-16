@@ -1,7 +1,7 @@
 defaults:
   - _self_
   - model: logistic_regression
-  - feature_extractor: chronos_small
+  - feature_extractor: ume
   - validation_method: lopo
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
@@ -9,7 +9,7 @@ defaults:
   # across channels
   # FIXME: none/null does not work, and I don't know how to fix it. For the moment, I 
   # just wrote down "None" in the code
-  - aggregator: mean_chan # accepted: mean_chan, mean_time or none
+  - aggregator: none # accepted: mean_chan, mean_time or none
   - dataset: apsync
   - feature_scaling_method: none
   - sample_scaling_method: none
@@ -41,7 +41,7 @@ engine:
   resampling: ${resampling}
   trainable_feature_extractor: ${trainable_feature_extractor}
   subsample_train_set: false
-  n_jobs: 43
+  n_jobs: 8
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true

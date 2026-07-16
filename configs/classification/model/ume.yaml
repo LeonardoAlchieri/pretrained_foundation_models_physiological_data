@@ -16,8 +16,13 @@ model:
   device: ${device_map}
   fine_tuning_type: full
   learning_rate: 6.8e-5
-  batch_size: 8
-  num_epochs: 6
+  use_layer_norm: true
+  class_weight: "balanced"
+  batch_size: 16
+  num_epochs: 20
+  early_stopping: true
+  patience: 3
+  monitor: val_macro_f1
   verbose: 1
 param_grid:
   fine_tuning_type: ["full"]

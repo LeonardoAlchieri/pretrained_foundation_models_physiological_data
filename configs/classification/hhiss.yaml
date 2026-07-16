@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: basic
+  # - sweeps@_here_: basic
   - override dataset: hhiss
   - override label_processor: custom_selector
   - _self_
