@@ -135,7 +135,7 @@ class Engine:
                         scoring=make_scorer(self.scoring),
                         cv=self.inner_cv_folds,
                         verbose=0,
-                        n_jobs=10,
+                        n_jobs=40,
                     )
                 else:
                     clf = deepcopy(self.model)

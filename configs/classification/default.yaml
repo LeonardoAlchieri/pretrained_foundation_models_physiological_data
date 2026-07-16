@@ -41,7 +41,7 @@ engine:
   resampling: ${resampling}
   trainable_feature_extractor: ${trainable_feature_extractor}
   subsample_train_set: false
-  n_jobs: 2
+  n_jobs: 43
   additional_metrics:
     - _target_: sklearn.metrics.accuracy_score
       _partial_: true
