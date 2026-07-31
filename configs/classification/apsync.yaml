@@ -7,5 +7,5 @@ defaults:
 
 label_name: engagement # TODO: accepted: engagement
 segment_length: 60
-device_map: "cuda"
+device_map: "mps"
 

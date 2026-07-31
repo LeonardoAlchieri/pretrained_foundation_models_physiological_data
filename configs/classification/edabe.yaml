@@ -8,7 +8,7 @@ defaults:
 label_name: artifact # accepted: cognitiveload
 dataset.side: unknown # accepted: right, left
 segment_length: 60 # in seconds
-device_map: "cuda" # accepted: "cpu", "cuda", "mps"
+device_map: "mps" # accepted: "cpu", "cuda", "mps"
 # FIXME: device_map is not working
 # NOTE: edamame does not support mps. I need to fix it.
 

@@ -23,6 +23,8 @@ iopath = ">=0.1.10,<0.2"
 # Cap fsspec so the conda solve doesn't pin a version newer than what
 # datasets (via mantis-tsfm) supports (fsspec<=2026.4.0).
 fsspec = "<=2026.4.0"
+global = ">=6.6.15,<7"
+htop = ">=3.5.2,<4"
 
 [target.osx-arm64.dependencies]
 pytorch = ">=2.6.0,<3"

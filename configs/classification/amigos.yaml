@@ -6,8 +6,8 @@ defaults:
   - override label_processor: extreme_only
   - _self_
 
-label_name: Arousal # accepted: Arousal, Dominance, Emotion, Liking, Valence
-dataset.side: shimmer # accepted: shimmer, empatica -> used to identify the device here!
+label_name: Dominance # accepted: Arousal, Dominance, Emotion, Liking, Valence
+dataset.side: shimmer # accepted: shimmer
 segment_length: 60 # in seconds
 device_map: "mps" # accepted: "cpu", "cuda", "mps"
 # FIXME: device_map is not working
@@ -18,7 +18,7 @@ label_processor:
   upper_threshold: 0.75
 
 datamodule:
-  recompute_features: true
+  recompute_features: false
 #   channels: [1, 2] # 0 mixed, 1 phasic, 2 tonic
 #   sample_scaling_method: 
 #     _target_: edamame.utils.sample_scaling.min_max_scaling

@@ -1,8 +1,8 @@
 defaults:
   - _self_
-  - model: logistic_regression
-  - feature_extractor: ume
-  - validation_method: lopo
+  - model: ume
+  - feature_extractor: none
+  - validation_method: tacv
   - resampling: none
   # aggregator is the method used to aggregate the features across the channels. 
   # Some feature extractors can accept the null: it means that the features can be computed

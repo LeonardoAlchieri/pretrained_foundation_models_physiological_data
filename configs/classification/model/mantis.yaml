@@ -16,5 +16,5 @@ model:
   base_learning_rate: 2e-4
 param_grid:
   fine_tuning_type: ["full"]
-  base_learning_rate: [2e-4]
-  num_epochs: [50]
+  # base_learning_rate: [2e-4]
+  # num_epochs: [50]
