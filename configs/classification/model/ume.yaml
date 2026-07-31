@@ -1,0 +1,31 @@
+# UME (Edamame/EfficientNet) used as an end-to-end, fine-tunable classifier
+# (NOT as a feature extractor).
+#
+# IMPORTANT: this model consumes the raw signal, so it must be paired with the
+# `none` feature extractor flattening to 2D. Run e.g.:
+#   python classification.py model=ume feature_extractor=none-flat aggregator=none
+# where `none-flat` uses NoneFeatureExtractor(preserve_shape=false) so the input
+# arrives as (n_samples, seq_len * n_channels) and is reshaped internally back to
+# (n_samples, seq_len, n_channels). UME is trained on EDA at native resolution,
+# so the sequence length is kept as-is (no resampling).
+model:
+  _target_: edamame_downstream.model.ume.UMEClassifier
+  model_name: "efficientnet"
+  weights_path: "ume_weights.nosync/ume.ckpt"
+  n_channels: 3 # must match len(datamodule.channels)
+  device: ${device_map}
+  fine_tuning_type: full
+  learning_rate: 6.8e-5
+  use_layer_norm: true
+  class_weight: "balanced"
+  batch_size: 16
+  num_epochs: 30
+  early_stopping: true
+  patience: 5
+  monitor: val_macro_f1
+  verbose: 0
+param_grid:
+  fine_tuning_type: ["full"]
+  batch_size: [4, 16]
+  learning_rate: [1e-4, 6.8e-5, 0.5e-5]
+  # num_epochs: [3, 5, 10, 20]

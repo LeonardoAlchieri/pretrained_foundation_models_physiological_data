@@ -1,13 +1,22 @@
 defaults:
   - default
-  - sweeps@_here_: basic
+  # - sweeps@_here_: basic
   - override dataset: hearts
   - override label_processor: label_binarizer
   - _self_
 
-label_name: sleep_wake # accepted: sleep_wake, SleepQuality
+label_name: sleep_wake # accepted: sleep_wake, sleep_quality
+dataset.side: unknown # accepted: left, right
 segment_length: 60
-device_map: "mps"
+device_map: "cuda"
 
 # label_processor:
 #   threshold: 3 # TODO: check if correct
+
+# self.model({"eeg": eeg, "ppg": ppg, "acc": acc})
+# {
+# "egg": (N, T, C), -> feature_extractor -> (N, D)
+# "ppg": (N, T, C),
+# "acc": (N, T, C),
+# "young_vs_old": (N,)
+# }

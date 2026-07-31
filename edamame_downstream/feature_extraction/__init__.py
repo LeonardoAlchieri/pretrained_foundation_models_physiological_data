@@ -1,6 +1,6 @@
 from .aggregator import MeanChanAggregator, MeanTimeAggregator, CatAggregator
 from .chronos import ChronosExtractor
-from .edamame import EdamameExtractor
+#from .edamame import EdamameExtractor
 from .handcrafted import HandcraftedFeatureExtractor
 from .handcrafted_baseline_big import HandcraftedFeatureExtractor as HandcraftedFeatureExtractorBig
 from .handcrafted_baseline_small import HandcraftedFeatureExtractor as HandcraftedFeatureExtractorSmall

@@ -1,4 +1,4 @@
 _target_: edamame_downstream.validation.TACV    
 num_folds: 5
 random_state: 42
-train_ratio: 0.6666667  # Proportion of test user data used for training (default: 2/3)
+train_ratio: 0.67  # Proportion of test user data used for training (default: 2/3)

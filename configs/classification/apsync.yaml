@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: train-size
+  # - sweeps@_here_: train-size
   - override dataset: apsync
   - override label_processor: label_binarizer
   - _self_
@@ -9,5 +9,3 @@ label_name: engagement # TODO: accepted: engagement
 segment_length: 60
 device_map: "mps"
 
-# label_processor:
-#   threshold: 3.4999 # TODO: check if correct

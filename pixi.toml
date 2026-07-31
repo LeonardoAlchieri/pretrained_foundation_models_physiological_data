@@ -1,7 +1,7 @@
 [workspace]
 channels = ["conda-forge"]
 name = "pretrained_foundation_models_physiological_data"
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
@@ -9,7 +9,6 @@ version = "0.1.0"
 [dependencies]
 python = ">=3.10"
 pandas = "<3.0"
-pytorch = ">=2.6.0,<3"
 pytorch-lightning = ">=2.6.1,<3"
 hydra-core = ">=1.3.2,<2"
 neurokit2 = ">=0.2.13,<0.3"
@@ -21,6 +20,34 @@ sktime = ">=0.40.1,<0.41"
 numba = ">=0.64.0,<0.65"
 fvcore = ">=0.1.5.post20221221,<0.2"
 iopath = ">=0.1.10,<0.2"
+# Cap fsspec so the conda solve doesn't pin a version newer than what
+# datasets (via mantis-tsfm) supports (fsspec<=2026.4.0).
+fsspec = "<=2026.4.0"
+global = ">=6.6.15,<7"
+htop = ">=3.5.2,<4"
+
+[target.osx-arm64.dependencies]
+pytorch = ">=2.6.0,<3"
+torchvision = ">=0.21.0,<0.22"
+
+[target.linux-64.dependencies]
+# Blackwell GPUs (RTX PRO 6000, sm_120) need PyTorch built against CUDA >=12.8.
+# conda-forge's 2.8+ pytorch-gpu builds use cuda129 and include sm_120 kernels;
+# the older 2.6 builds were cuda126 (only up to sm_90) and can't run on Blackwell.
+pytorch-gpu = ">=2.8,<3"
+# Pull torchvision from conda-forge (not PyPI) so the solver builds it against
+# the same CUDA toolchain as pytorch-gpu. A PyPI torchvision wheel ships cu13
+# and mismatches conda-forge's cu12 pytorch. torchvision is version-locked to a
+# specific torch release, so leave the range wide and let the solver match it to
+# whichever cuda129 pytorch it picks (a tight 0.21 pin would drag torch back to 2.6).
+torchvision = ">=0.23,<0.28"
+
+# Declare CUDA so pytorch-gpu resolves for the linux-64 target even when the
+# lock is solved from a non-CUDA host (e.g. macOS). 12.8 is the minimum that
+# ships Blackwell (sm_120) support. Harmless on osx-arm64, where nothing depends
+# on the __cuda virtual package.
+[system-requirements]
+cuda = "12.8"
 
 [pypi-dependencies]
 mantis-tsfm = ">=1.0.0, <2"
@@ -29,5 +56,5 @@ hydra-list-sweeper = ">=1.1.0, <2"
 imblearn = ">=0.0, <0.1"
 scikit-posthocs = ">=0.12.0, <0.13"
 jmetalpy = ">=1.9.0, <2"
-edamame = { path = "../eda-foundation-models/.", editable = true }
 momentfm = {git = "git+https://github.com/moment-timeseries-foundation-model/moment.git"}
+edamame = { path = "../eda-foundation-models/.", editable = true }

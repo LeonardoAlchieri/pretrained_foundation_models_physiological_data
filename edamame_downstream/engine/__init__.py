@@ -2,6 +2,7 @@ from functools import partial
 from logging import getLogger
 from pathlib import Path
 from typing import Callable
+from copy import deepcopy
 
 import numpy as np
 import omegaconf
@@ -79,6 +80,17 @@ class Engine:
             feature_extractor = self.trainable_features_extractor_list[fold_idx]
             X_test = feature_extractor.transform(X_test)
         return X_test
+    
+    def _check_param_grid(self) -> bool:
+        num_param_more_than_one: int = 0
+        for val in self.param_grid.values():
+            if len(val) > 1:
+                num_param_more_than_one += 1
+        if num_param_more_than_one == 0:
+            return False
+        else:
+            return True
+            
 
     def fit(self, datamodule: EDADataset):
         self.models = []
@@ -96,6 +108,9 @@ class Engine:
 
                 # TODO: hard coded, to add in conf file
                 imputer = SimpleImputer(strategy="mean")
+                if len(X_train.shape) > 2:
+                    X_train = X_train.reshape(X_train.shape[0], -1)
+                    
                 X_train = imputer.fit_transform(X_train)
                 self.imputers.append(imputer)
 
@@ -113,19 +128,21 @@ class Engine:
                         X_train, y_train, test_size=self.subsample_train_set, 
                         stratify=y_train, random_state=42
                     )
-
-                clf = GridSearchCV(
-                    self.model,
-                    self.param_grid,
-                    scoring=make_scorer(self.scoring),
-                    cv=self.inner_cv_folds,
-                    verbose=0,
-                    n_jobs=10,
-                )
+                if self._check_param_grid():
+                    clf = GridSearchCV(
+                        self.model,
+                        self.param_grid,
+                        scoring=make_scorer(self.scoring),
+                        cv=self.inner_cv_folds,
+                        verbose=0,
+                        n_jobs=40,
+                    )
+                else:
+                    clf = deepcopy(self.model)
                 clf.fit(X_train, y_train)
                 # NOTE: do not use clone, since it does not return a fitted model!
-                self.models.append(clf.best_estimator_)
-                # Optionally, store best params or scores
+                # self.models.append(clf.best_estimator_)
+                self.models.append(clf)
 
         if self.trainable_feature_extractor is not None:
             if len(self.models) != len(self.trainable_features_extractor_list):
@@ -148,6 +165,9 @@ class Engine:
             X_test = self._trainable_feature_extraction_step_test(X_test, fold_idx)
 
             imputer = self.imputers[fold_idx]
+            if len(X_test.shape) > 2:
+                X_test = X_test.reshape(X_test.shape[0], -1)
+                
             X_test = imputer.transform(X_test)
 
             model = self.models[fold_idx]

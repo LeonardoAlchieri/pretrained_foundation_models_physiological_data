@@ -27,6 +27,8 @@ hydra:
       model: 
       # - random_baseline
       - logistic_regression
+      - svm
+      - xgboost
       # - logistic_regression
       # # - logistic_regression
       # - logistic_regression

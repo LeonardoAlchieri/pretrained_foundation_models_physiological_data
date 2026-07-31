@@ -1,0 +1,10 @@
+# defaults:
+#   - label_processor: label_binarizer # binarizer for sleep_quality
+
+dataset: llamac
+side: empatica
+label_name: ${label_name}
+label_processor: ${label_processor}
+device_map: ${device_map}
+segment_length: ${segment_length} # seconds
+sampling_rate: 4 # Hz

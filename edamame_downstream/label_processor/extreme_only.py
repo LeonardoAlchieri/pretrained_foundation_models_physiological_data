@@ -1,9 +1,14 @@
 import numpy as np
 
-
 class ExtremeOnlyLabelProcessor:
 
-    def __init__(self, lower_threshold=0.25, upper_threshold=0.75, threshold_type="percentile"):
+    def __init__(self, lower_threshold: float | None =0.25, upper_threshold: float | None =0.75, threshold_type="percentile"):
+        if lower_threshold is None:
+            RuntimeWarning("lower_threshold is None, setting to 0.25")
+            lower_threshold = 0.25
+        if upper_threshold is None:
+            RuntimeWarning("upper_threshold is None, setting to 0.75")
+            upper_threshold = 0.75
         self.lower_threshold = lower_threshold
         self.upper_threshold = upper_threshold
         self.threshold_type = threshold_type

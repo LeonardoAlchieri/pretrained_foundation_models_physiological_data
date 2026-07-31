@@ -1,6 +1,6 @@
 defaults:
   - default
-  - sweeps@_here_: basic
+  # - sweeps@_here_: basic
   - override dataset: wesad
   # - override label_processor: label_binarizer
   - override label_processor: binarizer

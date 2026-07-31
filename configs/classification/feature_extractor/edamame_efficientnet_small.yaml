@@ -1,0 +1,9 @@
+_target_: edamame_downstream.feature_extraction.edamame.EdamameExtractor
+model_name: "efficientnet"
+checkpoint_path: ./ume_weights.nosync/small.ckpt
+device_map: ${device_map}
+# torch_dtype: "auto"
+aggregator: ${aggregator}
+normalization_fn: null
+  # _target_: edamame.utils.sample_scaling.mean_scaling
+  # _partial_: true
