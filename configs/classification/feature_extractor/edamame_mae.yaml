@@ -5,6 +5,6 @@ device_map: ${device_map}
 # torch_dtype: "auto"
 aggregator: ${aggregator}
 normalization_fn: 
-  _target_: edamame.utils.sample_scaling.mean_scaling
+  _target_: ume.utils.sample_scaling.mean_scaling
   _partial_: true
 batch_size: 128

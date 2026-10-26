@@ -4,8 +4,8 @@ Unlike :class:`edamame_downstream.feature_extraction.edamame.EdamameExtractor`,
 which uses the pretrained UME encoder only as a frozen feature extractor, this
 module exposes UME as a *model* in the sense of ``configs/classification/model/``:
 a scikit-learn-style classifier that is fine-tuned on the downstream task via
-``EdamamePipeline.fit`` and predicts labels directly with
-``EdamamePipeline.predict`` / ``predict_proba``.
+``UMEPipeline.fit`` and predicts labels directly with
+``UMEPipeline.predict`` / ``predict_proba``.
 
 This lets UME be swept and evaluated by the existing
 :class:`edamame_downstream.engine.Engine` (i.e. ``GridSearchCV``) exactly like any
@@ -22,7 +22,7 @@ import torch
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
-from edamame.pipeline import EdamamePipeline
+from ume.pipeline import UMEPipeline
 
 logger = getLogger(__name__)
 
@@ -35,7 +35,7 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
     (``preserve_shape=False``), i.e. a 2D array of shape
     ``(n_samples, seq_len * n_channels)``, and reshapes it back to the
     ``(n_samples, seq_len, n_channels)`` layout expected by
-    :meth:`EdamamePipeline.fit`. UME is trained on EDA data at the native
+    :meth:`UMEPipeline.fit`. UME is trained on EDA data at the native
     resolution, so — unlike Mantis — the sequence length is kept as-is (no
     resampling / padding).
 
@@ -43,9 +43,9 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
     ----------
     weights_path : str
         Path to the pretrained UME checkpoint (``.ckpt``) loaded via
-        :meth:`EdamamePipeline.from_pretrained`.
+        :meth:`UMEPipeline.from_pretrained`.
     model_name : str, default="efficientnet"
-        Backbone identifier understood by ``EdamamePipeline``. Fine-tuning is
+        Backbone identifier understood by ``UMEPipeline``. Fine-tuning is
         only supported for the EfficientNet (UME) encoder.
     n_channels : int, default=3
         Number of channels contained in the flattened input. Required to invert
@@ -58,9 +58,9 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
         Optional per-sample normalisation applied by the pipeline.
     model_config : dict, optional
         Optional explicit model configuration forwarded to
-        ``EdamamePipeline.from_pretrained``.
+        ``UMEPipeline.from_pretrained``.
     fine_tuning_type : {"full", "head", "scratch"}, default="full"
-        Fine-tuning strategy forwarded to ``EdamamePipeline.fit``.
+        Fine-tuning strategy forwarded to ``UMEPipeline.fit``.
     learning_rate : float, default=1e-3
         Learning rate for the classification head (and backbone when
         ``backbone_lr`` is None).
@@ -167,7 +167,7 @@ class UMEClassifier(BaseEstimator, ClassifierMixin):
 
         X_checked, y_checked = check_X_y(X, y, accept_sparse=False, ensure_2d=True)
 
-        self._pipeline = EdamamePipeline.from_pretrained(
+        self._pipeline = UMEPipeline.from_pretrained(
             self.model_name,
             weights_path=self.weights_path,
             model_config=self.model_config,

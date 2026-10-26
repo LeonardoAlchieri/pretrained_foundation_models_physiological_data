@@ -21,5 +21,5 @@ datamodule:
   recompute_features: false
 #   channels: [1, 2] # 0 mixed, 1 phasic, 2 tonic
 #   sample_scaling_method: 
-#     _target_: edamame.utils.sample_scaling.min_max_scaling
+#     _target_: ume.utils.sample_scaling.min_max_scaling
 #     _partial_: true

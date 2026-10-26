@@ -65,7 +65,7 @@ pip install -e .
 
 The environment is also described by `pixi.toml` / `pixi.lock` (`pixi install`), which is the reproducible path and the one that resolves the CUDA-enabled PyTorch builds.
 
-> **UME requires a sibling checkout.** `pixi.toml` declares the [`edamame`](https://github.com/LeonardoAlchieri/eda-foundation-models) package as an editable local dependency at `../eda-foundation-models`, so that repository must be cloned next to this one for any UME run (frozen or fine-tuned). UME checkpoints are expected under `ume_weights.nosync/`. Mantis instead comes from PyPI (`mantis-tsfm`) and downloads its weights from the Hugging Face hub.
+> **UME requires a sibling checkout.** `pixi.toml` declares the [`ume`](https://github.com/LeonardoAlchieri/eda-foundation-models) package as an editable local dependency at `../eda-foundation-models`, so that repository must be cloned next to this one for any UME run (frozen or fine-tuned). UME checkpoints are expected under `ume_weights.nosync/`. Mantis instead comes from PyPI (`mantis-tsfm`) and downloads its weights from the Hugging Face hub.
 
 ### Basic Usage
 
@@ -154,7 +154,7 @@ Each `.npz` file must contain exactly 4 keys with numpy arrays:
 ## 🤖 Supported Models
 
 ### Foundation Models (Fixed Feature Extractors)
-- **UME** (local checkpoint, e.g. `ume_weights.nosync/ume.ckpt`): EDA-specific foundation model (EfficientNet-style 1D encoder trained contrastively), provided by the [`edamame`](https://github.com/LeonardoAlchieri/eda-foundation-models) package
+- **UME** (local checkpoint, e.g. `ume_weights.nosync/ume.ckpt`): EDA-specific foundation model (EfficientNet-style 1D encoder trained contrastively), provided by the [`ume`](https://github.com/LeonardoAlchieri/eda-foundation-models) package
 - **MOMENT** (`AutonLab/MOMENT-1-large`): Time series foundation model
 - **Chronos** (`amazon/chronos-t5-large/small`): Amazon's time series forecasting model
 - **PatchTSMixer** (`ibm-granite/granite-timeseries-patchtsmixer`): IBM's patch-based model
@@ -294,7 +294,7 @@ A foundation model can enter the pipeline in two different roles, and the distin
 
 Two models are currently fine-tunable:
 
-- [`model=ume`](configs/classification/model/ume.yaml) → [`UMEClassifier`](edamame_downstream/model/ume.py), which fine-tunes the UME (EfficientNet) encoder through `EdamamePipeline.fit`
+- [`model=ume`](configs/classification/model/ume.yaml) → [`UMEClassifier`](edamame_downstream/model/ume.py), which fine-tunes the UME (EfficientNet) encoder through `UMEPipeline.fit`
 - [`model=mantis`](configs/classification/model/mantis.yaml) → [`MantisClassifier`](edamame_downstream/model/mantis.py), which fine-tunes Mantis-8M through `MantisTrainer.fit`
 
 ### How fine-tuning plugs into the pipeline
@@ -357,7 +357,7 @@ Additional notes:
 
 - **Validation split**: `UMEClassifier.fit` always holds out a stratified 20% of the fold's *training* data (`validation_split=0.2`) to drive early stopping; the test fold is never touched. With `early_stopping: true`, training stops after `patience` epochs without improvement in `monitor` (`val_macro_f1`, `val_acc` or `val_loss`) and the best epoch's weights are restored.
 - **Class imbalance**: `class_weight: "balanced"` is usually the right choice for these datasets, since most tasks are skewed.
-- **Weights**: `weights_path` is mandatory and must point at a local UME checkpoint (`.ckpt`); it is loaded via `EdamamePipeline.from_pretrained`.
+- **Weights**: `weights_path` is mandatory and must point at a local UME checkpoint (`.ckpt`); it is loaded via `UMEPipeline.from_pretrained`.
 
 ### Mantis fine-tuning (`model=mantis`)
 
@@ -390,7 +390,7 @@ python classification.py --config-name=<dataset> feature_extractor=mantis-finetu
 
 ### Requirements and caveats
 
-- **UME** requires the [`edamame`](https://github.com/LeonardoAlchieri/eda-foundation-models) package (declared in `pixi.toml` as an editable local dependency, `../eda-foundation-models`) plus a checkpoint under `ume_weights.nosync/`. **Mantis** requires `mantis-tsfm` (PyPI); its weights are pulled from the HF hub on first use.
+- **UME** requires the [`ume`](https://github.com/LeonardoAlchieri/eda-foundation-models) package (declared in `pixi.toml` as an editable local dependency, `../eda-foundation-models`) plus a checkpoint under `ume_weights.nosync/`. **Mantis** requires `mantis-tsfm` (PyPI); its weights are pulled from the HF hub on first use.
 - **Device**: set `device_map` (`cpu`, `cuda`, `mps`). Several dataset configs default to `mps`, but the configs also record that the UME (edamame) path does not support MPS — use `cpu` or `cuda` when fine-tuning UME.
 - **Cost**: fine-tuning runs once per outer fold, times inner folds, times grid points. LOPO on a dataset with many subjects and a 6-point grid means hundreds of fine-tuning runs. Also note that the inner `GridSearchCV` is currently created with `n_jobs=40`, hard-coded in [`edamame_downstream/engine/__init__.py`](edamame_downstream/engine/__init__.py) — harmless for cheap sklearn models, but it will oversubscribe a single GPU here. Prefer a single-valued `param_grid` (which skips `GridSearchCV` entirely) when fine-tuning on GPU.
 
@@ -607,7 +607,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [UME / EDAMAME](https://github.com/LeonardoAlchieri/eda-foundation-models) for the EDA foundation model and its fine-tuning pipeline
+- [UME](https://github.com/LeonardoAlchieri/eda-foundation-models) for the EDA foundation model and its fine-tuning pipeline
 - [MOMENT](https://github.com/moment-timeseries-foundation-model/moment) for the foundation time series model
 - [Chronos](https://github.com/amazon-science/chronos-forecasting) for Amazon's time series forecasting framework
 - [Mantis](https://huggingface.co/paris-noah/Mantis-8M) (`mantis-tsfm`) for the Mantis foundation model and its fine-tuning trainer

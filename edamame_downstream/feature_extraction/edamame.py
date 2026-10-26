@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 import numpy as np
 import torch
-from edamame.pipeline import EdamamePipeline
+from ume.pipeline import UMEPipeline
 from pytorch_lightning import LightningModule
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm.auto import tqdm
@@ -20,7 +20,7 @@ class EdamameExtractor:
     def __init__(
         self,
         model_name: str,
-        pipeline: Optional[EdamamePipeline] = None,
+        pipeline: Optional[UMEPipeline] = None,
         checkpoint_path: str | None = None,
         device_map: str = "cpu",
         normalization_fn: Optional[Callable] = None,
@@ -35,7 +35,7 @@ class EdamameExtractor:
         if pipeline is None:
             if checkpoint_path is None:
                 raise ValueError("checkpoint_path must be provided when model_name is a string.")
-            self.pipeline = EdamamePipeline.from_pretrained(
+            self.pipeline = UMEPipeline.from_pretrained(
                 model_name,
                 weights_path=checkpoint_path,
                 device_map=device_map,
@@ -45,7 +45,7 @@ class EdamameExtractor:
         else:
             if checkpoint_path is not None:
                 RuntimeWarning("checkpoint_path is ignored when a pipeline instance is provided.")
-            self.pipeline = EdamamePipeline(
+            self.pipeline = UMEPipeline(
                 model=pipeline,
                 model_name=model_name,
                 device=self.device_map,
